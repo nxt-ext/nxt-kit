@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app>
+	<servlet>
+		<servlet-name>Nxt</servlet-name>
+		<servlet-class>Nxt</servlet-class>
+		<async-supported>true</async-supported>
+		<load-on-startup>1</load-on-startup>
+
+		<init-param>
+			<param-name>blockchainStoragePath</param-name>
+			<param-value>blockchain.nrs</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>myScheme</param-name>
+			<param-value>http</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>myPort</param-name>
+			<param-value>7874</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>myAddress</param-name>
+			<param-value>{{ inventory_hostname }}</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>shareMyAddress</param-name>
+			<param-value>true</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>myHallmark</param-name>
+			<param-value></param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>wellKnownPeers</param-name>
+			<param-value>162.243.214.68; 95.85.46.164; 162.243.216.55; 162.243.143.15; 95.85.46.249; 93.190.92.74; 37.209.120.192; 93.190.92.75; 85.25.134.59; 93.190.92.76; vps1.nxtcrypto.org;  vps2.nxtcrypto.org;  vps3.nxtcrypto.org;  vps4.nxtcrypto.org;  vps5.nxtcrypto.org; nxtwallet.com; 31.220.50.208; nxt.ddos.me; 203.174.12.25; 88.198.142.92; 66.197.138.90; 64.120.180.106; 109.230.224.65; 80.86.92.50; node1.nextcoin.it; node2.nextcoin.it; node3.nextcoin.it; node4.nextcoin.it; node5.nextcoin.it; nxt.homer.ru; 31.204.130.123; 209.222.0.194; 209.222.16.10; node1.nxtbase.com; node11.nxtbase.com; node21.nxtbase.com; node27.nxtbase.com; node31.nxtbase.com; node41.nxtbase.com; node51.nxtbase.com; node61.nxtbase.com; node71.nxtbase.com; node81.nxtbase.com; node84.nxtbase.com node91.nxtbase.com; node95.nxtbase.com; node98.nxtbase.com; 85.214.222.82;</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>maxNumberOfConnectedPublicPeers</param-name>
+			<param-value>20</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>connectTimeout</param-name>
+			<param-value>2000</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>readTimeout</param-name>
+			<param-value>5000</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>enableHallmarkProtection</param-name>
+			<param-value>true</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>pushThreshold</param-name>
+			<param-value>1</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>pullThreshold</param-name>
+			<param-value>1</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>allowedUserHosts</param-name>
+			<param-value>*</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>allowedBotHosts</param-name>
+			<param-value>*</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>blacklistingPeriod</param-name>
+			<param-value>300000</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>communicationLoggingMask</param-name>
+			<param-value>0</param-value>
+		</init-param>
+
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Nxt</servlet-name>
+		<url-pattern>/nxt</url-pattern>
+	</servlet-mapping>
+
+	<filter>
+		<filter-name>DoSFilter</filter-name>
+		<filter-class>org.eclipse.jetty.servlets.DoSFilter</filter-class>
+		<init-param>
+			<param-name>maxRequestsPerSec</param-name>
+			<param-value>3000</param-value>
+		</init-param>
+		<init-param>
+			<param-name>delayMs</param-name>
+			<param-value>1000</param-value>
+		</init-param>
+		<init-param>
+			<param-name>trackSessions</param-name>
+			<param-value>false</param-value>
+		</init-param>
+		<async-supported>true</async-supported>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>DoSFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+</web-app>

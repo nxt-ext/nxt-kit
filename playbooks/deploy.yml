@@ -1,0 +1,56 @@
+---
+- name: install dependencies
+  hosts: nxts
+  gather_facts: no
+  tasks:
+  - name: install jre
+    apt: pkg=openjdk-7-jre state=latest
+    sudo: yes
+  - name: install unzip
+    apt: pkg=unzip state=latest
+    sudo: yes
+
+- name: update nxt
+  hosts: nxts
+  gather_facts: no
+  vars:
+    nxt_ext_folder: ~/ansible/nxt
+  tasks:
+#  - name: copy lastest distrib
+#    copy: src={{ nxt_ext_folder }}/distrib/nxt.zip dest=~
+#    notify:
+#    - uncron restart script
+#    - uncron check script
+#    - kill nxt
+#    - unpack new version
+#    - setup web config
+#    - run nxt
+
+  handlers:
+    - name: uncron restart script
+      cron: name="nxt memory leak workaround" state=absent
+    - name: uncron check script
+      cron: name="is nxt running" state=absent
+    - name: kill nxt
+      shell: pkill java && sleep 2
+    - name: unpack new version
+      shell: rm -rf ~/nxt && unzip nxt.zip -d ~
+    - name: setup web config
+      template: src={{ nxt_ext_folder }}/templates/web.j2 dest=~/nxt/webapps/root/WEB-INF/web.xml
+    - name: run nxt
+      script: "{{ nxt_ext_folder }}/scripts-src/check.sh"
+
+- name: ensure check and restart scripts @ cron
+  hosts: nxts
+  gather_facts: no
+  vars:
+    nxt_ext_folder: ~/ansible/nxt
+  tasks:
+  - name: copy check script
+    copy: src={{ nxt_ext_folder }}/scripts-src/check.sh dest=~/check.nxt.sh mode=0744
+  - name: copy restart script
+    copy: src={{ nxt_ext_folder }}/scripts-src/restart.sh dest=~/restart.nxt.sh mode=0744
+  - name: cron check script
+    cron: name="is nxt running" job="~/check.nxt.sh"
+  - name: cron restart script
+    cron: name="nxt memory leak workaround" special_time=hourly  job="~/restart.nxt.sh"
