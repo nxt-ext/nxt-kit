@@ -16,7 +16,14 @@
   vars:
     nxt_ext_folder: ~/ansible/nxt
   tasks:
+  - name: calculate local md5
+    local_action: shell /usr/bin/md5sum {{ nxt_ext_folder }}/distrib/nxt.zip | awk '{print $1;}'
+    register: localmd5
+  - name: calculate remote md5
+    shell: /usr/bin/md5sum ~/nxt.zip | awk '{print $1;}'
+    register: remotemd5
   - name: copy lastest distrib
+    when: localmd5.stdout != remotemd5.stdout
     copy: src={{ nxt_ext_folder }}/distrib/nxt.zip dest=~
     notify:
     - uncron restart script
@@ -25,7 +32,7 @@
     - unpack new version
     - setup web config
     - run nxt
-
+    
   handlers:
     - name: uncron restart script
       cron: name="nxt memory leak workaround" state=absent
