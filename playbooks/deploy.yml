@@ -16,15 +16,15 @@
   vars:
     nxt_ext_folder: ~/ansible/nxt
   tasks:
-#  - name: copy lastest distrib
-#    copy: src={{ nxt_ext_folder }}/distrib/nxt.zip dest=~
-#    notify:
-#    - uncron restart script
-#    - uncron check script
-#    - kill nxt
-#    - unpack new version
-#    - setup web config
-#    - run nxt
+  - name: copy lastest distrib
+    copy: src={{ nxt_ext_folder }}/distrib/nxt.zip dest=~
+    notify:
+    - uncron restart script
+    - uncron check script
+    - kill nxt
+    - unpack new version
+    - setup web config
+    - run nxt
 
   handlers:
     - name: uncron restart script
