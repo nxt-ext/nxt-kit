@@ -17,7 +17,7 @@
 
 * remote: create user, add it to [sudoers with NOPASSWD](http://lmgtfy.com/?q=sudo+nopasswd+all+commands) for all commands 
 * remote: set up [key authentication](http://lmgtfy.com/?q=ssh+key+authentication)
-* local: [add your servers to inventory](http://www.ansibleworks.com/docs/intro_inventory.html) to group `nxt`
+* local: [add your servers to inventory](http://www.ansibleworks.com/docs/intro_inventory.html) to group `nxts`
 * local: copy [latest version of nxt](https://bitcointalk.org/index.php?topic=345619.0) to `distrib/nxt.zip`
 * local: replace `nxt_tools_folder: ~/ansible/nxt` @ `playbooks/deploy.yml` with your local path to this repository
 * local: add `exec ssh-agent bash` to the end of `~/.profile`
