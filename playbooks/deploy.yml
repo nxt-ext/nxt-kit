@@ -14,17 +14,24 @@
   hosts: nxts
   gather_facts: no
   vars:
-    nxt_ext_folder: ~/ansible/nxt
+    nxt_local_folder: ~/ansible/nxt
+    nxt_remote_folder: ~/nxt-kit
   tasks:
+  - name: check remote folders
+    file: path={{ item }} state=directory owner={{ ansible_ssh_user }} mode=0744
+    with_items:
+      - "{{ nxt_remote_folder }}"
+      - "{{ nxt_remote_folder }}/distrib"
+      - "{{ nxt_remote_folder }}/sbin"
   - name: calculate local md5
-    local_action: shell /usr/bin/md5sum {{ nxt_ext_folder }}/distrib/nxt.zip | awk '{print $1;}'
+    local_action: shell /usr/bin/md5sum {{ nxt_local_folder }}/distrib/nxt.zip | awk '{print $1;}'
     register: localmd5
   - name: calculate remote md5
-    shell: /usr/bin/md5sum ~/nxt.zip | awk '{print $1;}'
+    shell: /usr/bin/md5sum {{ nxt_remote_folder }}/distrib/nxt.zip | awk '{print $1;}'
     register: remotemd5
   - name: copy lastest distrib
     when: localmd5.stdout != remotemd5.stdout
-    copy: src={{ nxt_ext_folder }}/distrib/nxt.zip dest=~
+    copy: src={{ nxt_local_folder }}/distrib/nxt.zip dest={{ nxt_remote_folder }}/distrib
     notify:
     - uncron restart script
     - uncron check script
@@ -39,25 +46,26 @@
     - name: uncron check script
       cron: name="is nxt running" state=absent
     - name: kill nxt
-      shell: pkill java && sleep 2
+      shell: pkill java || /bin/true
     - name: unpack new version
-      shell: rm -rf ~/nxt && unzip nxt.zip -d ~
+      shell: cd {{ nxt_remote_folder }} && rm -rf nxt && unzip distrib/nxt.zip 
     - name: setup web config
-      template: src={{ nxt_ext_folder }}/templates/web.j2 dest=~/nxt/webapps/root/WEB-INF/web.xml
+      template: src={{ nxt_local_folder }}/templates/web.j2 dest={{ nxt_remote_folder }}/nxt/webapps/root/WEB-INF/web.xml
     - name: run nxt
-      script: "{{ nxt_ext_folder }}/scripts-src/check.sh"
+      script: "{{ nxt_local_folder }}/scripts-src/check.sh"
 
 - name: ensure check and restart scripts @ cron
   hosts: nxts
   gather_facts: no
   vars:
-    nxt_ext_folder: ~/ansible/nxt
+    nxt_local_folder: ~/ansible/nxt
+    nxt_remote_folder: ~/nxt-kit
   tasks:
   - name: copy check script
-    copy: src={{ nxt_ext_folder }}/scripts-src/check.sh dest=~/check.nxt.sh mode=0744
+    copy: src={{ nxt_local_folder }}/scripts-src/check.sh dest={{ nxt_remote_folder }}/sbin/check.nxt.sh mode=0744
   - name: copy restart script
-    copy: src={{ nxt_ext_folder }}/scripts-src/restart.sh dest=~/restart.nxt.sh mode=0744
+    copy: src={{ nxt_local_folder }}/scripts-src/restart.sh dest={{ nxt_remote_folder }}/sbin/restart.nxt.sh mode=0744
   - name: cron check script
-    cron: name="is nxt running" job="~/check.nxt.sh"
+    cron: name="is nxt running" job="{{ nxt_remote_folder }}/sbin/check.nxt.sh"
   - name: cron restart script
-    cron: name="nxt memory leak workaround" special_time=hourly  job="~/restart.nxt.sh"
+    cron: name="nxt memory leak workaround" special_time=hourly  job="{{ nxt_remote_folder }}/sbin/restart.nxt.sh"

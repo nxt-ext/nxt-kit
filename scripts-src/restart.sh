@@ -1,4 +1,4 @@
 #!/bin/bash
-cd ~/nxt
+cd ~/nxt-kit/nxt
 pkill java
 nohup java -jar start.jar &

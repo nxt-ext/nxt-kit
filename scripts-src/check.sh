@@ -3,7 +3,7 @@ if [ -z "$(pgrep java)" ]
   then
      # nxt is not running
     echo 'ERROR: nxt is NOT running'
-    ~/restart.nxt.sh
+    ~/nxt-kit/sbin/restart.nxt.sh
     echo 'RESTARTED: nxt'
   else
      # nxt is running
