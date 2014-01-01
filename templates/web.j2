@@ -33,7 +33,7 @@
 
 		<init-param>
 			<param-name>myHallmark</param-name>
-			<param-value></param-value>
+			<param-value>{% if hallmark_result is defined and hallmark_result.stdout is defined %}{{ (hallmark_result.stdout|from_json).hallmark }}{% endif %}</param-value>
 		</init-param>
 
 		<init-param>
