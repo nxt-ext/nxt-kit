@@ -30,15 +30,28 @@
       - "{{ nxt_remote_folder }}"
       - "{{ nxt_remote_folder }}/distrib"
       - "{{ nxt_remote_folder }}/sbin"
+  - name: remove cached chain
+    file: path="{{ nxt_remote_folder }}/distrib/chain.tar.gz" state=absent
   - name: calculate local md5
-    local_action: shell /usr/bin/md5sum {{ nxt_local_folder }}/distrib/nxt.zip | awk '{print $1;}'
+    local_action: shell /usr/bin/md5sum {{ nxt_local_folder }}/distrib/{{ item }} | awk '{print $1;}'
+    with_items:
+      - "chain-original.tar.gz"
+      - "nxt.zip"
+    changed_when: false
     register: localmd5
   - name: calculate remote md5
-    shell: /usr/bin/md5sum {{ nxt_remote_folder }}/distrib/nxt.zip | awk '{print $1;}'
+    shell: /usr/bin/md5sum {{ nxt_remote_folder }}/distrib/{{ item }} | awk '{print $1;}'
+    with_items:
+      - "chain-original.tar.gz"
+      - "nxt.zip"
+    changed_when: false
     register: remotemd5
+  - name: copy original chain
+    copy: src={{ nxt_local_folder }}/distrib/chain-original.tar.gz dest={{ nxt_remote_folder }}/distrib
+    when: localmd5.results[0].stdout != remotemd5.results[0].stdout
   - name: remote runs different version
     shell: /bin/true
-    when: localmd5.stdout != remotemd5.stdout
+    when: localmd5.results[1].stdout != remotemd5.results[1].stdout
     notify:
     - uncron restart script
     - uncron check script
@@ -48,7 +61,6 @@
     - unpack new version
     - setup web config
     - run nxt
-    
   handlers:
     - name: uncron restart script
       cron: name="nxt memory leak workaround" state=absent

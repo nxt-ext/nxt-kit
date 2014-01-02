@@ -8,6 +8,8 @@
 * hallmarks nodes
 * updates them on script re-run (if needed)
 * crons restart and health check 
+* caches valid chain
+* handles java.lang.NullPointerException by reverting to last valid chain
 
 ## Dependencies 
 
@@ -20,6 +22,7 @@
 * remote: set up [key authentication](http://lmgtfy.com/?q=ssh+key+authentication)
 * local: [add your servers to inventory](http://www.ansibleworks.com/docs/intro_inventory.html) to group `nxts`
 * local: copy [latest version of nxt](https://bitcointalk.org/index.php?topic=345619.0) to `distrib/nxt.zip`
+* local (_optional_): add valid `blockchain.nrs blocks.nxt transactions.nxt` to `distrib/chain.tar.gz`
 * local: replace `nxt_tools_folder: ~/ansible/nxt` @ `playbooks/deploy.yml` with your local path to this repository
 * local: add `exec ssh-agent bash` to the end of `~/.profile`
 * local: add `ssh-add ~/.ssh/PRIVATE-KEY-FOR-REMOTE-SERVER > /dev/null 2>&1` to the end of the `~/.bashrc` *for each* remote server
