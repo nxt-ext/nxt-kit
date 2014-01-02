@@ -53,7 +53,6 @@
     shell: /bin/true
     when: localmd5.results[1].stdout != remotemd5.results[1].stdout
     notify:
-    - uncron restart script
     - uncron check script
     - generate hallmark
     - kill nxt
@@ -61,9 +60,9 @@
     - unpack new version
     - setup web config
     - run nxt
+  - name: uncron restart script # obsolete and will be removed
+    cron: name="nxt memory leak workaround" state=absent
   handlers:
-    - name: uncron restart script
-      cron: name="nxt memory leak workaround" state=absent
     - name: uncron check script
       cron: name="is nxt running" state=absent
     - name: generate hallmark
@@ -90,9 +89,5 @@
   tasks:
   - name: copy check script
     copy: src={{ nxt_local_folder }}/scripts-src/check.sh dest={{ nxt_remote_folder }}/sbin/check.nxt.sh mode=0744
-  - name: copy restart script
-    copy: src={{ nxt_local_folder }}/scripts-src/restart.sh dest={{ nxt_remote_folder }}/sbin/restart.nxt.sh mode=0744
   - name: cron check script
     cron: name="is nxt running" job="{{ nxt_remote_folder }}/sbin/check.nxt.sh"
-  - name: cron restart script
-    cron: name="nxt memory leak workaround" special_time=hourly  job="{{ nxt_remote_folder }}/sbin/restart.nxt.sh"
