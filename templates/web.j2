@@ -38,7 +38,7 @@
 
 		<init-param>
 			<param-name>myHallmark</param-name>
-			<param-value>{% if hallmark_result is defined and hallmark_result.stdout is defined %}{{ (hallmark_result.stdout|from_json).hallmark }}{% endif %}</param-value>
+			<param-value>{% set hallmark_default = "{\"hallmark\":\"{{ hallmark_predef|default("") }}\"}" %}{% set hallmark_stdout = hallmark_result.stdout|default(hallmark_default) %}{% set hallmark_jsoned = hallmark_stdout|from_json %}{{ hallmark_jsoned.hallmark }}</param-value>
 		</init-param>
 
 		<init-param>
