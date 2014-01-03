@@ -66,11 +66,11 @@
     - name: uncron check script
       cron: name="is nxt running" state=absent
     - name: generate hallmark
-      local_action: command wget -qO- "http://127.0.0.1:7874/nxt?requestType=markHost&secretPhrase={{ secret_phrase|urlencode }}&host={{ inventory_hostname }}&weight={{ hallmark_weight }}&date={{ hallmark_date }}"
+      local_action: command wget -qO- -t 2 -T 5 "http://127.0.0.1:7874/nxt?requestType=markHost&secretPhrase={{ secret_phrase|urlencode }}&host={{ inventory_hostname }}&weight={{ hallmark_weight }}&date={{ hallmark_date }}"
       register: hallmark_result
       when: secret_phrase != ""
     - name: kill nxt
-      shell: pkill java || /bin/true
+      shell: pkill -f 'java \-jar start.jar' || /bin/true
     - name: copy lastest distrib
       copy: src={{ nxt_local_folder }}/distrib/nxt.zip dest={{ nxt_remote_folder }}/distrib
     - name: unpack new version

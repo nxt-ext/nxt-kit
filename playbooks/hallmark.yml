@@ -1,0 +1,24 @@
+---
+- name: hallmark existing nxt nodes
+  hosts: nxts
+  gather_facts: no
+  vars:
+    nxt_local_folder: ~/ansible/nxt
+    nxt_remote_folder: ~/nxt-kit
+    hallmark_date: "2013-12-11"
+    hallmark_weight: 100
+  vars_prompt:
+    - name: "secret_phrase"
+      prompt: "secret phrase for hallmarking [if empty hallmark is taken from `hallmark_predef`]"
+      default: ""
+      private: yes
+  tasks:
+    - name: generate hallmark
+      local_action: command wget -qO- -t 2 -T 5 "http://127.0.0.1:7874/nxt?requestType=markHost&secretPhrase={{ secret_phrase|urlencode }}&host={{ inventory_hostname }}&weight={{ hallmark_weight }}&date={{ hallmark_date }}"
+      register: hallmark_result
+      when: secret_phrase != ""
+    - name: setup web config
+      template: src={{ nxt_local_folder }}/templates/web.j2 dest={{ nxt_remote_folder }}/nxt/webapps/root/WEB-INF/web.xml
+    - name: kill nxt
+      shell: pkill -f 'java \-jar start.jar' || /bin/true
+      changed_when: false
