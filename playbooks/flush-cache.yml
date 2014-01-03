@@ -1,0 +1,12 @@
+---
+- name: flush cache
+  hosts: nxts
+  gather_facts: no
+  vars:
+    nxt_local_folder: ~/ansible/nxt
+    nxt_remote_folder: ~/nxt-kit
+  tasks:
+  - name: remove cached chain
+    file: path="{{ nxt_remote_folder }}/distrib/chain.tar.gz" state=absent
+  - name: kill nxt
+    shell: pkill java || /bin/true

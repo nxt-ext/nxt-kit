@@ -32,4 +32,8 @@
 
 `ansible-playbook -f 10 -v path/to/repo/playbooks/deploy.yml`
 
+## If you caught fork-chain
+
+`ansible-playbook -f 10 -v path/to/repo/playbooks/flush-cache.yml`
+
 Tips: [999992273311888788](http://87.230.14.1/nxt/nxt.cgi?action=3000&acc=999992273311888788)
