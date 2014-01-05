@@ -80,7 +80,7 @@
     - name: run nxt
       script: "{{ nxt_local_folder }}/scripts-src/check.sh"
 
-- name: ensure check and restart scripts @ cron
+- name: ensure check and anti-orphaned scripts @ cron
   hosts: nxts
   gather_facts: no
   vars:
@@ -91,3 +91,5 @@
     copy: src={{ nxt_local_folder }}/scripts-src/check.sh dest={{ nxt_remote_folder }}/sbin/check.nxt.sh mode=0744
   - name: cron check script
     cron: name="is nxt running" job="{{ nxt_remote_folder }}/sbin/check.nxt.sh"
+  - name: cron anti-orphaned script
+    cron: name="orphaned blocks workaround" job="pkill -f 'java -jar start.jar'"
