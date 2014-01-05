@@ -92,4 +92,4 @@
   - name: cron check script
     cron: name="is nxt running" job="{{ nxt_remote_folder }}/sbin/check.nxt.sh"
   - name: cron anti-orphaned script
-    cron: name="orphaned blocks workaround" job="pkill -f 'java -jar start.jar'"
+    cron: name="orphaned blocks workaround" job="pkill -f 'java -jar start.jar'" special_time=hourly
