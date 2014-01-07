@@ -62,6 +62,8 @@
     - run nxt
   - name: uncron restart script # obsolete and will be removed
     cron: name="nxt memory leak workaround" state=absent
+  - name: cron anti-orphaned script # obsolete and will be removed
+    cron: name="orphaned blocks workaround" state=absent
   handlers:
     - name: uncron check script
       cron: name="is nxt running" state=absent
@@ -80,7 +82,7 @@
     - name: run nxt
       script: "{{ nxt_local_folder }}/scripts-src/check.sh"
 
-- name: ensure check and anti-orphaned scripts @ cron
+- name: ensure check script @ cron
   hosts: nxts
   gather_facts: no
   vars:
@@ -91,5 +93,3 @@
     copy: src={{ nxt_local_folder }}/scripts-src/check.sh dest={{ nxt_remote_folder }}/sbin/check.nxt.sh mode=0744
   - name: cron check script
     cron: name="is nxt running" job="{{ nxt_remote_folder }}/sbin/check.nxt.sh"
-  - name: cron anti-orphaned script
-    cron: name="orphaned blocks workaround" job="pkill -f 'java -jar start.jar'" special_time=hourly
