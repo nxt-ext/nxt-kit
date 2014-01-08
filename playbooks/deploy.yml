@@ -1,13 +1,20 @@
 ---
 - name: install dependencies
   hosts: nxts
-  gather_facts: no
   tasks:
-  - name: install jre
-    apt: pkg=openjdk-7-jre state=latest
+  - name: install packages on Debian-based
+    apt: pkg={{ item }} state=latest    
+    with_items:
+      - "openjdk-7-jre"
+      - "unzip"
+    when: ansible_os_family == "Debian"
     sudo: yes
-  - name: install unzip
-    apt: pkg=unzip state=latest
+  - name: install packages on RedHat-based
+    yum: name={{ item }} state=latest
+    with_items:
+      - "openjdk-7-jre"
+      - "unzip"
+    when: ansible_os_family == "RedHat"
     sudo: yes
 
 - name: update nxt
@@ -62,7 +69,7 @@
     - run nxt
   - name: uncron restart script # obsolete and will be removed
     cron: name="nxt memory leak workaround" state=absent
-  - name: cron anti-orphaned script # obsolete and will be removed
+  - name: uncron anti-orphaned script # obsolete and will be removed
     cron: name="orphaned blocks workaround" state=absent
   handlers:
     - name: uncron check script
