@@ -3,12 +3,12 @@ if [[ "`pidof -x $(basename $0) -o %PPID`" ]]; then exit 0; fi
 cd ~/nxt-kit/nxt
 pid=$(pgrep -f 'java -jar start.jar')
 typeset -i curr_block_id=$(wget -qO- http://localhost:7874/nxt?requestType=getState | grep -oP '"numberOfBlocks":\d+' | awk -F ":" '{print $2}')
-if [[ $curr_block_id != 0 ]] && [[ $pid ]]; then
+if (( $curr_block_id != 0 )) && [[ $pid ]]; then
   prev_block_id=0
   if [ -f ../distrib/blockID ]; then
       typeset -i prev_block_id=$(cat ../distrib/blockID)
   fi
-  if [[ $curr_block_id != $prev_block_id ]]; then
+  if (( $curr_block_id != $prev_block_id )); then
     echo 'OK: caching chain'
     echo $curr_block_id > ../distrib/blockID
     echo 1 > ../distrib/blockCnt
@@ -18,7 +18,7 @@ if [[ $curr_block_id != 0 ]] && [[ $pid ]]; then
     if [ -f ../distrib/blockCnt ]; then
         typeset -i prev_block_cnt=$(cat ../distrib/blockCnt)
     fi
-    if [[ $prev_block_cnt < 180 ]]; then
+    if (( $prev_block_cnt < 180 )); then
       ((prev_block_cnt++))
       echo $prev_block_cnt > ../distrib/blockCnt
       echo "OK: block repeated $prev_block_cnt times"
