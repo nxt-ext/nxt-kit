@@ -27,7 +27,7 @@
     hallmark_weight: 100
   vars_prompt:
     - name: "secret_phrase"
-      prompt: "secret phrase for hallmarking [empty for non-hallmarking]"
+      prompt: "secret phrase for hallmarking [if empty hallmark is taken from `hallmark_predef` host variable]"
       default: ""
       private: yes
   tasks:
