@@ -66,7 +66,6 @@
     - copy lastest distrib
     - unpack new version
     - setup web config
-    - run nxt
   - name: uncron restart script # obsolete and will be removed
     cron: name="nxt memory leak workaround" state=absent
   - name: uncron anti-orphaned script # obsolete and will be removed
@@ -86,8 +85,6 @@
       shell: cd {{ nxt_remote_folder }} && rm -rf nxt && unzip distrib/nxt.zip 
     - name: setup web config
       template: src={{ nxt_local_folder }}/templates/web.j2 dest={{ nxt_remote_folder }}/nxt/webapps/root/WEB-INF/web.xml
-    - name: run nxt
-      script: "{{ nxt_local_folder }}/scripts-src/check.sh"
 
 - name: ensure check script @ cron
   hosts: nxts
