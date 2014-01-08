@@ -31,7 +31,7 @@ if [[ $curr_block_id != 0 ]] && [[ $pid ]]; then
 else
   echo 'ERROR: nxt is NOT running correctly'
   pkill -f 'java -jar start.jar'
-  rm -f blockchain.nrs blocks.nxt transactions.nxt
+  rm -f blockchain.nrs blocks.nxt transactions.nxt ../distrib/blockID ../distrib/blockCnt
   if [ -f ../distrib/chain.tar.gz ]; then
     echo 'Restoring cached chain'
     tar -xzvf ../distrib/chain.tar.gz
@@ -41,4 +41,6 @@ else
     tar -xzvf ../distrib/chain-original.tar.gz
   fi
   nohup java -jar start.jar &
+  # Restoing sometimes requires more time than 1 minute
+  sleep 150
 fi
