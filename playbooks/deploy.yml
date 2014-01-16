@@ -31,6 +31,10 @@
       default: ""
       private: yes
   tasks:
+  - name: uncron check script
+    cron: name="is nxt running" state=absent
+  - name: kill check script
+    shell: pkill -f 'check.nxt.sh' || /bin/true
   - name: check remote folders
     file: path={{ item }} state=directory owner={{ ansible_ssh_user }} mode=0744
     with_items:
@@ -60,7 +64,6 @@
     shell: /bin/true
     when: localmd5.results[1].stdout != remotemd5.results[1].stdout
     notify:
-    - uncron check script
     - generate hallmark
     - kill nxt
     - copy lastest distrib
@@ -71,8 +74,6 @@
   - name: uncron anti-orphaned script # obsolete and will be removed
     cron: name="orphaned blocks workaround" state=absent
   handlers:
-    - name: uncron check script
-      cron: name="is nxt running" state=absent
     - name: generate hallmark
       local_action: command wget -qO- -t 2 -T 5 "http://127.0.0.1:7874/nxt?requestType=markHost&secretPhrase={{ secret_phrase|urlencode }}&host={{ inventory_hostname }}&weight={{ hallmark_weight }}&date={{ hallmark_date }}"
       register: hallmark_result
