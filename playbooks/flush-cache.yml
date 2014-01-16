@@ -6,11 +6,6 @@
     nxt_local_folder: ~/ansible/nxt
     nxt_remote_folder: ~/nxt-kit
   tasks:
-  - name: check remote folders
-    file: path={{ item }} state=directory owner={{ ansible_ssh_user }} mode=0744
-    with_items:
-      - "{{ nxt_remote_folder }}"
-      - "{{ nxt_remote_folder }}/distrib"
   - name: calculate local md5
     local_action: shell /usr/bin/md5sum {{ nxt_local_folder }}/distrib/{{ item }} | awk '{print $1;}'
     with_items:
@@ -26,9 +21,15 @@
   - name: copy original chain
     copy: src={{ nxt_local_folder }}/distrib/chain-original.tar.gz dest={{ nxt_remote_folder }}/distrib
     when: localmd5.results[0].stdout != remotemd5.results[0].stdout
+  - name: uncron check script
+    cron: name="is nxt running" state=absent
+  - name: kill check script
+    shell: pkill -f 'check.nxt.sh'
+    ignore_errors: yes
   - name: remove cached chain
     file: path="{{ nxt_remote_folder }}/distrib/chain.tar.gz" state=absent
   - name: kill nxt
-    shell: pkill -f 'java \-jar start.jar' || /bin/true
-    changed_when: false
-
+    shell: pkill -f 'java \-jar start.jar'
+    ignore_errors: yes
+  - name: cron check script
+    cron: name="is nxt running" job="{{ nxt_remote_folder }}/sbin/check.nxt.sh"
