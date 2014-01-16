@@ -1,6 +1,9 @@
 # Nxt extensions
 [Ansible](http://www.ansibleworks.com/) kit for deploying [Nxt](https://bitcointalk.org/index.php?topic=345619.0) instances 
 
+## For more help
+Visit [forum thread](https://forums.nxtcrypto.org/viewtopic.php?f=39&t=230)
+
 ## Features
 
 * deploys nxt @ any number of remote servers (VPSs)
