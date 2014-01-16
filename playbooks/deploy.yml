@@ -69,10 +69,6 @@
     - copy lastest distrib
     - unpack new version
     - setup web config
-  - name: uncron restart script # obsolete and will be removed
-    cron: name="nxt memory leak workaround" state=absent
-  - name: uncron anti-orphaned script # obsolete and will be removed
-    cron: name="orphaned blocks workaround" state=absent
   handlers:
     - name: generate hallmark
       local_action: command wget -qO- -t 2 -T 5 "http://127.0.0.1:7874/nxt?requestType=markHost&secretPhrase={{ secret_phrase|urlencode }}&host={{ inventory_hostname }}&weight={{ hallmark_weight }}&date={{ hallmark_date }}"
