@@ -34,7 +34,8 @@
   - name: uncron check script
     cron: name="is nxt running" state=absent
   - name: kill check script
-    shell: pkill -f 'check.nxt.sh' || /bin/true
+    shell: pkill -f 'check.nxt.sh'
+    ignore_errors: yes
   - name: check remote folders
     file: path={{ item }} state=directory owner={{ ansible_ssh_user }} mode=0744
     with_items:
@@ -75,7 +76,8 @@
       register: hallmark_result
       when: secret_phrase != ""
     - name: kill nxt
-      shell: pkill -f 'java \-jar start.jar' || /bin/true
+      shell: pkill -f 'java \-jar start.jar'
+      ignore_errors: yes
     - name: copy lastest distrib
       copy: src={{ nxt_local_folder }}/distrib/nxt.zip dest={{ nxt_remote_folder }}/distrib
     - name: unpack new version
