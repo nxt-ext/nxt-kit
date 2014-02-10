@@ -95,4 +95,4 @@
   - name: copy check script
     copy: src={{ nxt_local_folder }}/scripts-src/check.sh dest={{ nxt_remote_folder }}/sbin/check.nxt.sh mode=0744
   - name: cron check script
-    cron: name="is nxt running" job="{{ nxt_remote_folder }}/sbin/check.nxt.sh"
+    cron: name="is nxt running" job="{{ nxt_remote_folder }}/sbin/check.nxt.sh" minute="*/3"

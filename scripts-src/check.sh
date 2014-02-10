@@ -12,13 +12,13 @@ if (( $curr_block_id != 0 )) && [[ $pid ]]; then
     echo 'OK: caching chain'
     echo $curr_block_id > ../distrib/blockID
     echo 1 > ../distrib/blockCnt
-    tar -czvf ../distrib/chain.tar.gz blockchain.nrs blocks.nxt transactions.nxt
+    tar -czvf ../distrib/chain.tar.gz nxt_db/
   else
     prev_block_cnt=0
     if [ -f ../distrib/blockCnt ]; then
         typeset -i prev_block_cnt=$(cat ../distrib/blockCnt)
     fi
-    if (( $prev_block_cnt < 180 )); then
+    if (( $prev_block_cnt < 60 )); then
       ((prev_block_cnt++))
       echo $prev_block_cnt > ../distrib/blockCnt
       echo "OK: block repeated $prev_block_cnt times"
@@ -31,7 +31,7 @@ if (( $curr_block_id != 0 )) && [[ $pid ]]; then
 else
   echo 'ERROR: nxt is NOT running correctly'
   pkill -f 'java -jar start.jar'
-  rm -f blockchain.nrs blocks.nxt transactions.nxt ../distrib/blockID ../distrib/blockCnt
+  rm -rf nxt_db/ ../distrib/blockID ../distrib/blockCnt
   if [ -f ../distrib/chain.tar.gz ]; then
     echo 'Restoring cached chain'
     tar -xzvf ../distrib/chain.tar.gz
@@ -40,7 +40,7 @@ else
     echo 'Restoring original chain'
     tar -xzvf ../distrib/chain-original.tar.gz
   fi
-  nohup java -jar start.jar &
+  nohup java -jar start.jar > ../distrib/nohup.log &
   # Restoing sometimes requires more time than 1 minute
-  sleep 150
+  sleep 250
 fi
