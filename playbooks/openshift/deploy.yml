@@ -1,0 +1,88 @@
+---
+- name: break default app
+  hosts: openshifts
+  gather_facts: no
+  tasks: 
+  - name: kill program on 8080 port
+    shell: pkill ruby
+    ignore_errors: yes
+  - name: prevent it from starting again
+    shell: rm -f "$OPENSHIFT_REPO_DIR/diy/testrubyserver.rb"
+
+
+- name: update nxt
+  hosts: openshifts
+  gather_facts: no
+  vars:
+    nxt_local_folder: ~/ansible/nxt
+    hallmark_date: "2013-12-11"
+    hallmark_weight: 100
+  vars_prompt:
+    - name: "secret_phrase"
+      prompt: "secret phrase for hallmarking [if empty hallmark is taken from `hallmark_predef` host variable]"
+      default: ""
+      private: yes
+  tasks:
+  - name: set nxt_remote_folder
+    shell: echo $OPENSHIFT_DATA_DIR/nxt-kit
+    register: nxt_remote_folder
+  - name: check remote folders
+    file: path={{ item }} state=directory owner={{ ansible_ssh_user }} mode=0744
+    with_items:
+      - "{{ nxt_remote_folder }}"
+      - "{{ nxt_remote_folder }}/distrib"
+  - name: calculate local md5
+    local_action: shell /usr/bin/md5sum {{ nxt_local_folder }}/distrib/{{ item }} | awk '{print $1;}'
+    with_items:
+      - "chain-original.tar.gz"
+      - "nxt.zip"
+    changed_when: false
+    register: localmd5
+  - name: calculate remote md5
+    shell: /usr/bin/md5sum {{ nxt_remote_folder }}/distrib/{{ item }} | awk '{print $1;}'
+    with_items:
+      - "chain-original.tar.gz"
+      - "nxt.zip"
+    changed_when: false
+    register: remotemd5
+  - name: copy original chain
+    copy: src={{ nxt_local_folder }}/distrib/chain-original.tar.gz dest={{ nxt_remote_folder }}/distrib
+    when: localmd5.results[0].stdout != remotemd5.results[0].stdout
+  - name: remote runs different version
+    shell: /bin/true
+    when: localmd5.results[1].stdout != remotemd5.results[1].stdout
+    notify:
+    - generate hallmark
+    - kill nxt
+    - copy lastest distrib
+    - unpack new version
+    - setup web config
+    - disable https module
+    - set IP
+    - set port in module
+    - set port in web config
+    - start Nxt
+  handlers:
+    - name: generate hallmark
+      local_action: command wget -qO- -t 2 -T 5 "http://127.0.0.1:7874/nxt?requestType=markHost&secretPhrase={{ secret_phrase|urlencode }}&host={{ inventory_hostname }}&weight={{ hallmark_weight }}&date={{ hallmark_date }}"
+      register: hallmark_result
+      when: secret_phrase != ""
+    - name: kill nxt
+      shell: pkill -f 'java \-jar start.jar'
+      ignore_errors: yes
+    - name: copy lastest distrib
+      copy: src={{ nxt_local_folder }}/distrib/nxt.zip dest={{ nxt_remote_folder }}/distrib
+    - name: unpack new version
+      shell: cd {{ nxt_remote_folder }} && rm -rf nxt && unzip distrib/nxt.zip 
+    - name: setup web config
+      template: src={{ nxt_local_folder }}/templates/web.j2 dest={{ nxt_remote_folder }}/nxt/webapps/root/WEB-INF/web.xml
+    - name: disable https module
+      shell: sed -i '/--module=https/s/^/#/' {{ nxt_remote_folder }}/nxt/start.ini
+    - name: set IP
+      shell: env | grep IP | awk -F"=" '{print "jetty.host="$2}' >> {{ nxt_remote_folder }}/nxt/start.ini
+    - name: set port in module
+      shell: sed -i 's/7874/8080/' {{ nxt_remote_folder }}/nxt/start.d/http.ini; 
+    - name: set port in web config
+      shell: sed -i 's/7874/8080/' {{ nxt_remote_folder }}/nxt/webapps/root/WEB-INF/web.xml
+    - name: start Nxt
+      shell: cd {{ nxt_remote_folder }}/nxt; nohup java -jar start.jar > ../distrib/nohup.log &
