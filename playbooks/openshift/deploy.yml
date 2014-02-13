@@ -15,6 +15,7 @@
   gather_facts: no
   vars:
     nxt_local_folder: ~/ansible/nxt
+    nxt_remote_folder: ~/app-root/data/nxt-kit
     hallmark_date: "2013-12-11"
     hallmark_weight: 100
   vars_prompt:
@@ -23,11 +24,8 @@
       default: ""
       private: yes
   tasks:
-  - name: set nxt_remote_folder
-    shell: echo $OPENSHIFT_DATA_DIR/nxt-kit
-    register: nxt_remote_folder
   - name: check remote folders
-    file: path={{ item }} state=directory owner={{ ansible_ssh_user }} mode=0744
+    file: path={{ item }} state=directory mode=0744
     with_items:
       - "{{ nxt_remote_folder }}"
       - "{{ nxt_remote_folder }}/distrib"
