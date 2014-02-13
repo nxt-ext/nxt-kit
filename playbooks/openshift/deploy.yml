@@ -16,6 +16,7 @@
   vars:
     nxt_local_folder: ~/ansible/nxt
     nxt_remote_folder: ~/app-root/data/nxt-kit
+    nxt_cron_path: ~/cron/minutely
     hallmark_date: "2013-12-11"
     hallmark_weight: 100
   vars_prompt:
@@ -29,6 +30,12 @@
     with_items:
       - "{{ nxt_remote_folder }}"
       - "{{ nxt_remote_folder }}/distrib"
+      - "{{ nxt_cron_path }}"
+  - name: uncron check script
+    file: path="{{ nxt_cron_path }}/check.nxt.sh" state=absent
+  - name: kill check script
+    shell: pkill -f 'check.nxt.sh'
+    ignore_errors: yes
   - name: calculate local md5
     local_action: shell /usr/bin/md5sum {{ nxt_local_folder }}/distrib/{{ item }} | awk '{print $1;}'
     with_items:
@@ -59,7 +66,6 @@
     - set IP
     - set port in module
     - set port in web config
-    - start Nxt
   handlers:
     - name: generate hallmark
       local_action: command wget -qO- -t 2 -T 5 "http://127.0.0.1:7874/nxt?requestType=markHost&secretPhrase={{ secret_phrase|urlencode }}&host={{ inventory_hostname }}&weight={{ hallmark_weight }}&date={{ hallmark_date }}"
@@ -82,5 +88,20 @@
       shell: sed -i 's/7874/8080/' {{ nxt_remote_folder }}/nxt/start.d/http.ini; 
     - name: set port in web config
       shell: sed -i 's/7874/8080/' {{ nxt_remote_folder }}/nxt/webapps/root/WEB-INF/web.xml
-    - name: start Nxt
-      shell: cd {{ nxt_remote_folder }}/nxt; nohup java -jar start.jar > ../distrib/nohup.log &
+
+- name: ensure check script @ cron
+  hosts: openshifts
+  gather_facts: no
+  vars:
+    nxt_local_folder: ~/ansible/nxt
+    nxt_remote_folder: ~/app-root/data/nxt-kit
+    nxt_cron_path: ~/cron/minutely
+  tasks:
+  - name: cron check script
+    template: src={{ nxt_local_folder }}/scripts-src/check.sh dest={{ nxt_cron_path }}/check.nxt.sh mode=0744
+# - name: set check every 3 minutes
+#   shell: sed -i '2i if (( $(date "+%M") % 3 )); then exit 0; fi' {{ nxt_cron_path }}/check.nxt.sh
+  - name: remove sleep
+    shell: sed -i '/sleep/d' {{ nxt_cron_path }}/check.nxt.sh
+  - name: run script (Press Ctrl+C after 30 seconds!!!)
+    shell: "{{ nxt_cron_path }}/check.nxt.sh"

@@ -1,6 +1,6 @@
 #!/bin/bash
 if [[ "`pidof -x $(basename $0) -o %PPID`" ]]; then exit 0; fi
-cd ~/nxt-kit/nxt
+cd {{ nxt_remote_folder }}/nxt
 pid=$(pgrep -f 'java -jar start.jar')
 typeset -i curr_block_id=$(wget -qO- http://localhost:7874/nxt?requestType=getState | grep -oP '"numberOfBlocks":\d+' | awk -F ":" '{print $2}')
 if (( $curr_block_id != 0 )) && [[ $pid ]]; then
