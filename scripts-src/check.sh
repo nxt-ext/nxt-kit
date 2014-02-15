@@ -43,4 +43,16 @@ else
   nohup java -jar start.jar > ../distrib/nohup.log &
   # Restoing sometimes requires more time than 1 minute
   sleep 250
+#  nxt_pid=$!
+#  typeset -i nxt_start_time=$(date +%s)
+#  tail -f ../distrib/nohup.log | while read LOGLINE
+#  do
+#    if ! ps -p $nxt_pid > /dev/null || \
+#       (( $(date +%s) - nxt_start_time < 20 * 60 )) || \
+#       [[ "${LOGLINE}" == *"Exception"* ]]
+#       then pkill -P $$ tail && exit 1
+#    elif [[ "${LOGLINE}" == *"started successfully"* ]]
+#       then pkill -P $$ tail && exit 0
+#    fi
+#  done
 fi
