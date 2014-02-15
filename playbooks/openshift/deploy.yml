@@ -1,14 +1,13 @@
 ---
-- name: break default app
+- name: break default app on 8080 port
   hosts: openshifts
   gather_facts: no
   tasks: 
-  - name: kill program on 8080 port
+  - name: kill it
     shell: pkill ruby
     ignore_errors: yes
   - name: prevent it from starting again
     shell: rm -f "$OPENSHIFT_REPO_DIR/diy/testrubyserver.rb"
-
 
 - name: update nxt
   hosts: openshifts
@@ -16,14 +15,7 @@
   vars:
     nxt_local_folder: ~/ansible/nxt
     nxt_remote_folder: ~/app-root/data/nxt-kit
-    nxt_cron_path: ~/cron/minutely
-    hallmark_date: "2013-12-11"
-    hallmark_weight: 100
-  vars_prompt:
-    - name: "secret_phrase"
-      prompt: "secret phrase for hallmarking [if empty hallmark is taken from `hallmark_predef` host variable]"
-      default: ""
-      private: yes
+    nxt_cron_path: ~/app-deployments/current/repo/.openshift/cron/minutely
   tasks:
   - name: check remote folders
     file: path={{ item }} state=directory mode=0744
@@ -57,7 +49,6 @@
     shell: /bin/true
     when: localmd5.results[1].stdout != remotemd5.results[1].stdout
     notify:
-    - generate hallmark
     - kill nxt
     - copy lastest distrib
     - unpack new version
@@ -67,10 +58,6 @@
     - set port in module
     - set port in web config
   handlers:
-    - name: generate hallmark
-      local_action: command wget -qO- -t 2 -T 5 "http://127.0.0.1:7874/nxt?requestType=markHost&secretPhrase={{ secret_phrase|urlencode }}&host={{ inventory_hostname }}&weight={{ hallmark_weight }}&date={{ hallmark_date }}"
-      register: hallmark_result
-      when: secret_phrase != ""
     - name: kill nxt
       shell: pkill -f 'java \-jar start.jar'
       ignore_errors: yes
@@ -95,9 +82,9 @@
   vars:
     nxt_local_folder: ~/ansible/nxt
     nxt_remote_folder: ~/app-root/data/nxt-kit
-    nxt_cron_path: ~/cron/minutely
+    nxt_cron_path: ~/app-deployments/current/repo/.openshift/cron/minutely
   tasks:
-  - name: cron check script
+  - name: cron
     template: src={{ nxt_local_folder }}/scripts-src/check.sh dest={{ nxt_cron_path }}/check.nxt.sh mode=0744
 # - name: set check every 3 minutes
 #   shell: sed -i '2i if (( $(date "+%M") % 3 )); then exit 0; fi' {{ nxt_cron_path }}/check.nxt.sh
