@@ -16,6 +16,9 @@
     nxt_local_folder: ~/ansible/nxt
     nxt_remote_folder: ~/app-root/data/nxt-kit
     nxt_cron_path: ~/app-deployments/current/repo/.openshift/cron/minutely
+    kit_peerServerPort: 8080
+    kit_enableAPIServer: "false"
+    kit_enableUIServer: "false"
   tasks:
   - name: check remote folders
     file: path={{ item }} state=directory mode=0744
@@ -49,32 +52,29 @@
     shell: /bin/true
     when: localmd5.results[1].stdout != remotemd5.results[1].stdout
     notify:
+    - kill old nxt
     - kill nxt
     - copy lastest distrib
     - unpack new version
-    - setup web config
-    - disable https module
     - set IP
-    - set port in module
-    - set port in web config
+    - setup properties
   handlers:
-    - name: kill nxt
+    # Obsolete and will be removed
+    - name: kill old nxt
       shell: pkill -f 'java \-jar start.jar'
+      ignore_errors: yes
+    - name: kill nxt
+      shell: pkill -f 'nxt.jar'
       ignore_errors: yes
     - name: copy lastest distrib
       copy: src={{ nxt_local_folder }}/distrib/nxt.zip dest={{ nxt_remote_folder }}/distrib
     - name: unpack new version
       shell: cd {{ nxt_remote_folder }} && rm -rf nxt && unzip distrib/nxt.zip 
-    - name: setup web config
-      template: src={{ nxt_local_folder }}/templates/web.j2 dest={{ nxt_remote_folder }}/nxt/webapps/root/WEB-INF/web.xml
-    - name: disable https module
-      shell: sed -i '/--module=https/s/^/#/' {{ nxt_remote_folder }}/nxt/start.ini
     - name: set IP
-      shell: env | grep IP | awk -F"=" '{print "jetty.host="$2}' >> {{ nxt_remote_folder }}/nxt/start.ini
-    - name: set port in module
-      shell: sed -i 's/7874/8080/' {{ nxt_remote_folder }}/nxt/start.d/http.ini; 
-    - name: set port in web config
-      shell: sed -i 's/7874/8080/' {{ nxt_remote_folder }}/nxt/webapps/root/WEB-INF/web.xml
+      shell: env | grep IP | awk -F"=" '{print $2}'
+      register: kit_ServerHost
+    - name: setup properties
+      template: src={{ nxt_local_folder }}/templates/nxt.properties.j2 dest={{ nxt_remote_folder }}/nxt/conf/nxt.properties
 
 - name: ensure check script @ cron
   hosts: openshifts

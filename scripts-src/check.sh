@@ -1,8 +1,8 @@
 #!/bin/bash
 if [[ "`pidof -x $(basename $0) -o %PPID`" ]]; then exit 0; fi
 cd {{ nxt_remote_folder }}/nxt
-pid=$(pgrep -f 'java -jar start.jar')
-typeset -i curr_block_id=$(wget -qO- http://localhost:7874/nxt?requestType=getState | grep -oP '"numberOfBlocks":\d+' | awk -F ":" '{print $2}')
+pid=$(pgrep -f 'nxt.jar')
+typeset -i curr_block_id=$(wget -qO- http://localhost:7876/nxt?requestType=getState | grep -oP '"numberOfBlocks":\d+' | awk -F ":" '{print $2}')
 if (( $curr_block_id != 0 )) && [[ $pid ]]; then
   prev_block_id=0
   if [ -f ../distrib/blockID ]; then
@@ -24,13 +24,17 @@ if (( $curr_block_id != 0 )) && [[ $pid ]]; then
       echo "OK: block repeated $prev_block_cnt times"
     else
        echo "ERROR: I can't stand this block anymore"
+       # Obsolete and will be removed
        pkill -f 'java -jar start.jar'
+       pkill -f 'nxt.jar'
        rm -f ../distrib/chain.tar.gz
     fi
   fi
 else
   echo 'ERROR: nxt is NOT running correctly'
+  # Obsolete and will be removed
   pkill -f 'java -jar start.jar'
+  pkill -f 'nxt.jar'
   rm -rf nxt_db/ ../distrib/blockID ../distrib/blockCnt
   if [ -f ../distrib/chain.tar.gz ]; then
     echo 'Restoring cached chain'
@@ -40,7 +44,7 @@ else
     echo 'Restoring original chain'
     tar -xzvf ../distrib/chain-original.tar.gz
   fi
-  nohup java -jar start.jar > ../distrib/nohup.log &
+  nohup java -cp nxt.jar:lib/*:conf nxt.Nxt
   # Restoing sometimes requires more time than 1 minute
   sleep 250
 #  nxt_pid=$!

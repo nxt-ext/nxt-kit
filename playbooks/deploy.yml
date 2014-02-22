@@ -25,6 +25,7 @@
     nxt_remote_folder: ~/nxt-kit
     hallmark_date: "2013-12-11"
     hallmark_weight: 100
+    kit_ServerHost: "0.0.0.0"
   vars_prompt:
     - name: "secret_phrase"
       prompt: "secret phrase for hallmarking [if empty hallmark is taken from `hallmark_predef` host variable]"
@@ -66,24 +67,28 @@
     when: localmd5.results[1].stdout != remotemd5.results[1].stdout
     notify:
     - generate hallmark
+    - kill old nxt
     - kill nxt
     - copy lastest distrib
     - unpack new version
-    - setup web config
+    - setup properties
   handlers:
     - name: generate hallmark
-      local_action: command wget -qO- -t 2 -T 5 "http://127.0.0.1:7874/nxt?requestType=markHost&secretPhrase={{ secret_phrase|urlencode }}&host={{ inventory_hostname }}&weight={{ hallmark_weight }}&date={{ hallmark_date }}"
+      local_action: command wget -qO- -t 2 -T 5 "http://127.0.0.1:7876/nxt?requestType=markHost&secretPhrase={{ secret_phrase|urlencode }}&host={{ inventory_hostname }}&weight={{ hallmark_weight }}&date={{ hallmark_date }}"
       register: hallmark_result
       when: secret_phrase != ""
-    - name: kill nxt
+    - name: kill old nxt
       shell: pkill -f 'java \-jar start.jar'
+      ignore_errors: yes
+    - name: kill nxt
+      shell: pkill -f 'nxt.jar'
       ignore_errors: yes
     - name: copy lastest distrib
       copy: src={{ nxt_local_folder }}/distrib/nxt.zip dest={{ nxt_remote_folder }}/distrib
     - name: unpack new version
       shell: cd {{ nxt_remote_folder }} && rm -rf nxt && unzip distrib/nxt.zip 
-    - name: setup web config
-      template: src={{ nxt_local_folder }}/templates/web.j2 dest={{ nxt_remote_folder }}/nxt/webapps/root/WEB-INF/web.xml
+    - name: setup properties
+      template: src={{ nxt_local_folder }}/templates/nxt.properties.j2 dest={{ nxt_remote_folder }}/nxt/conf/nxt.properties
 
 - name: ensure check script @ cron
   hosts: nxts
