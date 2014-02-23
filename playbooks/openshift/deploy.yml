@@ -15,7 +15,7 @@
   vars:
     nxt_local_folder: ~/ansible/nxt
     nxt_remote_folder: ~/app-root/data/nxt-kit
-    nxt_cron_path: ~/app-deployments/current/repo/.openshift/cron/minutely
+    nxt_cron_path: ~/app-root/runtime/repo/.openshift/cron/minutely
     kit_peerServerPort: 8080
     kit_enableAPIServer: "false"
     kit_enableUIServer: "false"
@@ -47,7 +47,7 @@
     register: remotemd5
   - name: copy original chain
     copy: src={{ nxt_local_folder }}/distrib/chain-original.tar.gz dest={{ nxt_remote_folder }}/distrib
-    when: localmd5.results[0].stdout != remotemd5.results[0].stdout
+    when: localmd5.results[0].stdout != remotemd5.results[0].stdout and localmd5.results[0].stdout != ""
   - name: remote runs different version
     shell: /bin/true
     when: localmd5.results[1].stdout != remotemd5.results[1].stdout
@@ -71,7 +71,7 @@
     - name: unpack new version
       shell: cd {{ nxt_remote_folder }} && rm -rf nxt && unzip distrib/nxt.zip 
     - name: set IP
-      shell: env | grep IP | awk -F"=" '{print $2}'
+      shell: echo $OPENSHIFT_DIY_IP
       register: kit_ServerHost
     - name: setup properties
       template: src={{ nxt_local_folder }}/templates/nxt.properties.j2 dest={{ nxt_remote_folder }}/nxt/conf/nxt.properties
@@ -82,13 +82,7 @@
   vars:
     nxt_local_folder: ~/ansible/nxt
     nxt_remote_folder: ~/app-root/data/nxt-kit
-    nxt_cron_path: ~/app-deployments/current/repo/.openshift/cron/minutely
+    nxt_cron_path: ~/app-root/runtime/repo/.openshift/cron/minutely
   tasks:
   - name: cron
-    template: src={{ nxt_local_folder }}/scripts-src/check.sh dest={{ nxt_cron_path }}/check.nxt.sh mode=0744
-# - name: set check every 3 minutes
-#   shell: sed -i '2i if (( $(date "+%M") % 3 )); then exit 0; fi' {{ nxt_cron_path }}/check.nxt.sh
-  - name: remove sleep
-    shell: sed -i '/sleep/d' {{ nxt_cron_path }}/check.nxt.sh
-  - name: run script (Press Ctrl+C after 30 seconds!!!)
-    shell: "{{ nxt_cron_path }}/check.nxt.sh"
+    template: src={{ nxt_local_folder }}/scripts-src/openshift.check.sh dest={{ nxt_cron_path }}/check.nxt.sh mode=0744
