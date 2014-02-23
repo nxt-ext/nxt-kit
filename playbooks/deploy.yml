@@ -61,7 +61,7 @@
     register: remotemd5
   - name: copy original chain
     copy: src={{ nxt_local_folder }}/distrib/chain-original.tar.gz dest={{ nxt_remote_folder }}/distrib
-    when: localmd5.results[0].stdout != remotemd5.results[0].stdout
+    when: localmd5.results[0].stdout != remotemd5.results[0].stdout and localmd5.results[0].stdout != ""
   - name: remote runs different version
     shell: /bin/true
     when: localmd5.results[1].stdout != remotemd5.results[1].stdout
