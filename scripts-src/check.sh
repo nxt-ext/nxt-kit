@@ -44,7 +44,7 @@ else
     echo 'Restoring original chain'
     tar -xzvf ../distrib/chain-original.tar.gz
   fi
-  nohup java -cp nxt.jar:lib/*:conf nxt.Nxt
+  nohup java -cp nxt.jar:lib/*:conf nxt.Nxt &
   # Restoing sometimes requires more time than 1 minute
   sleep 250
 #  nxt_pid=$!
