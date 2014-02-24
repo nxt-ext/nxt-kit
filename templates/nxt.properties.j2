@@ -12,7 +12,7 @@ nxt.uiServerHost={{ kit_ServerHost.stdout|default(kit_ServerHost) }}
 
 nxt.myAddress={{ inventory_hostname }}
 
-nxt.myPlatform=nxt.now.im
+nxt.myPlatform={{ kit_myPlatform|default("nxt.now.im") }}
 
 nxt.myHallmark={% set hallmark_default = "{\"hallmark\":\"{{ hallmark_predef|default("") }}\"}" %}{% set hallmark_stdout = (hallmark_result.stdout if hallmark_result is defined)|default(hallmark_default) %}{% set hallmark_jsoned = hallmark_stdout|from_json %}{{ hallmark_jsoned.hallmark }}
 
