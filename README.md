@@ -25,7 +25,7 @@ Visit [forum thread](https://forums.nxtcrypto.org/viewtopic.php?f=39&t=230)
 * remote: set up [key authentication](http://lmgtfy.com/?q=ssh+key+authentication)
 * local: [add your servers to inventory](http://www.ansibleworks.com/docs/intro_inventory.html) to group `nxts`
 * local: copy [latest version of nxt](https://bitcointalk.org/index.php?topic=345619.0) to `distrib/nxt.zip`
-* local (_optional_): add valid `blockchain.nrs blocks.nxt transactions.nxt` to `distrib/chain-original.tar.gz`
+* local (_optional_): add valid `nxt_db` gzipped-tar folder to `distrib/chain-original.tar.gz`
 * local: replace `nxt_tools_folder: ~/ansible/nxt` @ `playbooks/deploy.yml` with your local path to this repository
 * local: add `exec ssh-agent bash` to the end of `~/.profile`
 * local: add `ssh-add ~/.ssh/PRIVATE-KEY-FOR-REMOTE-SERVER > /dev/null 2>&1` to the end of the `~/.bashrc` *for each* remote server
@@ -34,9 +34,5 @@ Visit [forum thread](https://forums.nxtcrypto.org/viewtopic.php?f=39&t=230)
 ## How to run
 
 `ansible-playbook -f 10 -v path/to/repo/playbooks/deploy.yml`
-
-## If you caught fork-chain
-
-`ansible-playbook -f 10 -v path/to/repo/playbooks/flush-cache.yml`
 
 Tips: [999992273311888788](http://87.230.14.1/nxt/nxt.cgi?action=3000&acc=999992273311888788)
