@@ -17,7 +17,8 @@
     nxt_remote_folder: ~/app-root/data/nxt-kit
     nxt_cron_path: ~/app-root/runtime/repo/.openshift/cron/minutely
     kit_peerServerPort: 8080
-    kit_enableAPIServer: "false"
+    kit_announcedPort: 80
+    kit_apiServerPort: 27876
     kit_enableUIServer: "false"
   tasks:
   - name: check remote folders
@@ -83,6 +84,14 @@
     nxt_local_folder: ~/ansible/nxt
     nxt_remote_folder: ~/app-root/data/nxt-kit
     nxt_cron_path: ~/app-root/runtime/repo/.openshift/cron/minutely
+    kit_apiServerPort: 27876
   tasks:
+  - name: set IP
+    shell: echo $OPENSHIFT_DIY_IP
+    register: kit_ServerHost
   - name: cron
-    template: src={{ nxt_local_folder }}/scripts-src/openshift.check.sh dest={{ nxt_cron_path }}/check.nxt.sh mode=0744
+    template: src={{ nxt_local_folder }}/scripts-src/check.sh dest={{ nxt_cron_path }}/check.nxt.sh mode=0744
+  - name: set check every 10 minutes
+    shell: sed -i '2i if (( $(date "+%M") % 10 )); then exit 0; fi' {{ nxt_cron_path }}/check.nxt.sh
+  - name: remove sleep
+    shell: sed -i '/sleep/d' {{ nxt_cron_path }}/check.nxt.sh
