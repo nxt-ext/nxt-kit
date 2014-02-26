@@ -8,7 +8,7 @@ if (( $curr_block_id != 0 )); then
       typeset -i prev_block_id=$(cat ../distrib/blockID)
   fi
   if (( $curr_block_id != $prev_block_id )); then
-    echo 'OK: caching chain'
+    echo "$(date) OK: caching chain" >> ../distrib/cron.log
     echo $curr_block_id > ../distrib/blockID
     echo 1 > ../distrib/blockCnt
     tar -czvf ../distrib/chain.tar.gz nxt_db/
@@ -20,9 +20,9 @@ if (( $curr_block_id != 0 )); then
     if (( $prev_block_cnt < 60 )); then
       ((prev_block_cnt++))
       echo $prev_block_cnt > ../distrib/blockCnt
-      echo "OK: block repeated $prev_block_cnt times"
+      echo "$(date) OK: block repeated $prev_block_cnt times" >> ../distrib/cron.log
     else
-       echo "ERROR: I can't stand this block anymore"
+       echo "$(date) ERROR: I can't stand this block anymore" >> ../distrib/cron.log
        # Obsolete and will be removed
        pkill -f 'java -jar start.jar'
        pkill -f 'nxt.jar'
@@ -30,17 +30,17 @@ if (( $curr_block_id != 0 )); then
     fi
   fi
 else
-  echo 'ERROR: nxt is NOT running correctly'
+  echo "$(date) ERROR: nxt is NOT running correctly" >> ../distrib/cron.log
   # Obsolete and will be removed
   pkill -f 'java -jar start.jar'
   pkill -f 'nxt.jar'
   rm -rf nxt_db/ ../distrib/blockID ../distrib/blockCnt
   if [ -f ../distrib/chain.tar.gz ]; then
-    echo 'Restoring cached chain'
+    echo "$(date) Restoring cached chain" >> ../distrib/cron.log
     tar -xzvf ../distrib/chain.tar.gz
     rm -f ../distrib/chain.tar.gz
   elif [ -f ../distrib/chain-original.tar.gz ]; then
-    echo 'Restoring original chain'
+    echo "$(date) Restoring original chain" >> ../distrib/cron.log
     tar -xzvf ../distrib/chain-original.tar.gz
   fi
   nohup java -cp nxt.jar:lib/*:conf nxt.Nxt > /dev/null 2>&1 &
