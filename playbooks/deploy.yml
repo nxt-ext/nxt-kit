@@ -74,7 +74,7 @@
     - setup properties
   handlers:
     - name: generate hallmark
-      local_action: command wget -qO- -t 2 -T 5 "http://127.0.0.1:7876/nxt" --post-data="requestType=markHost&secretPhrase={{ secret_phrase|urlencode }}&host={{ inventory_hostname }}&weight={{ hallmark_weight }}&date={{ hallmark_date }}"
+      local_action: command wget -qO- "http://127.0.0.1:7876/nxt" --post-data="requestType=markHost&secretPhrase={{ secret_phrase|urlencode }}&host={{ inventory_hostname }}&weight={{ hallmark_weight }}&date={{ hallmark_date }}"
       register: hallmark_result
       when: secret_phrase != ""
     - name: kill old nxt
