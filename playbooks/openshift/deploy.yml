@@ -2,7 +2,7 @@
 - name: break default app on 8080 port
   hosts: openshifts
   gather_facts: no
-  tasks: 
+  tasks:
   - name: kill it
     shell: pkill ruby
     ignore_errors: yes
@@ -82,7 +82,7 @@
     - name: copy lastest distrib
       copy: src={{ nxt_local_folder }}/distrib/nxt.zip dest={{ nxt_remote_folder }}/distrib
     - name: unpack new version
-      shell: cd {{ nxt_remote_folder }} && rm -rf nxt && unzip distrib/nxt.zip 
+      shell: cd {{ nxt_remote_folder }} && rm -rf nxt && unzip distrib/nxt.zip
     - name: set IP
       shell: echo $OPENSHIFT_DIY_IP
       register: kit_ServerHost
@@ -107,3 +107,5 @@
     shell: sed -i '2i if (( $(date "+%M") % 10 )); then exit 0; fi' {{ nxt_cron_path }}/check.nxt.sh
   - name: remove sleep
     shell: sed -i '/sleep/d' {{ nxt_cron_path }}/check.nxt.sh
+  - name: remove unsupported anti-parallel execution workaround
+    shell: sed -i '/pidof/d' {{ nxt_cron_path }}/check.nxt.sh
