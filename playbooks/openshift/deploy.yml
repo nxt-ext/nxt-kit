@@ -1,4 +1,37 @@
 ---
+- name: move nxt-kit to new folder
+  hosts: openshifts
+  gather_facts: no
+  vars:
+    nxt_local_folder: ~/nxt-kit
+    nxt_remote_folder: ~/app-root/data/nxt-kit
+    nxt_cron_path: ~/app-root/runtime/repo/.openshift/cron/minutely
+  tasks:
+  - name: uncron check script
+    file: path="{{ nxt_cron_path }}/check.nxt.sh" state=absent
+  - name: kill check script
+    shell: pkill -f 'check.nxt.sh'
+    ignore_errors: yes
+  - name: previous installation exists
+    stat: path="{{ nxt_remote_folder }}"
+    register: p
+  - name: remote runs previous version of nxt-kit
+    shell: /bin/true
+    when: p.stat.isdir is defined and p.stat.isdir == true
+    notify:
+    - kill old nxt
+    - kill nxt
+    - move folder
+  handlers:
+    - name: kill old nxt
+      shell: pkill -f 'java \-jar start.jar'
+      ignore_errors: yes
+    - name: kill nxt
+      shell: pkill -f 'nxt.jar'
+      ignore_errors: yes
+    - name: move folder
+      shell: mv {{ nxt_remote_folder }} {{ nxt_remote_folder }}-deployed
+
 - name: break default app on 8080 port
   hosts: openshifts
   gather_facts: no
@@ -13,8 +46,8 @@
   hosts: openshifts
   gather_facts: no
   vars:
-    nxt_local_folder: ~/ansible/nxt
-    nxt_remote_folder: ~/app-root/data/nxt-kit
+    nxt_local_folder: ~/nxt-kit
+    nxt_remote_folder: ~/app-root/data/nxt-kit-deployed
     nxt_cron_path: ~/app-root/runtime/repo/.openshift/cron/minutely
     hallmark_date: "2013-12-11"
     hallmark_weight: 100
@@ -93,8 +126,8 @@
   hosts: openshifts
   gather_facts: no
   vars:
-    nxt_local_folder: ~/ansible/nxt
-    nxt_remote_folder: ~/app-root/data/nxt-kit
+    nxt_local_folder: ~/nxt-kit
+    nxt_remote_folder: ~/app-root/data/nxt-kit-deployed
     nxt_cron_path: ~/app-root/runtime/repo/.openshift/cron/minutely
     kit_apiServerPort: 27876
   tasks:

@@ -1,9 +1,41 @@
 ---
+- name: move nxt-kit to new folder
+  hosts: nxts
+  gather_facts: no
+  vars:
+    nxt_local_folder: ~/nxt-kit
+    nxt_remote_folder: ~/nxt-kit
+  tasks:
+  - name: uncron check script
+    cron: name="is nxt running" state=absent
+  - name: kill check script
+    shell: pkill -f 'check.nxt.sh'
+    ignore_errors: yes
+  - name: previous installation exists
+    stat: path="{{ nxt_remote_folder }}"
+    register: p
+  - name: remote runs previous version of nxt-kit
+    shell: /bin/true
+    when: p.stat.isdir is defined and p.stat.isdir == true
+    notify:
+    - kill old nxt
+    - kill nxt
+    - move folder
+  handlers:
+    - name: kill old nxt
+      shell: pkill -f 'java \-jar start.jar'
+      ignore_errors: yes
+    - name: kill nxt
+      shell: pkill -f 'nxt.jar'
+      ignore_errors: yes
+    - name: move folder
+      shell: mv {{ nxt_remote_folder }} {{ nxt_remote_folder }}-deployed
+
 - name: install dependencies
   hosts: nxts
   tasks:
   - name: install packages on Debian-based
-    apt: pkg={{ item }} state=latest    
+    apt: pkg={{ item }} state=latest
     with_items:
       - "openjdk-7-jre"
       - "unzip"
@@ -21,8 +53,8 @@
   hosts: nxts
   gather_facts: no
   vars:
-    nxt_local_folder: ~/ansible/nxt
-    nxt_remote_folder: ~/nxt-kit
+    nxt_local_folder: ~/nxt-kit
+    nxt_remote_folder: ~/nxt-kit-deployed
     hallmark_date: "2013-12-11"
     hallmark_weight: 100
     kit_ServerHost: "0.0.0.0"
@@ -86,7 +118,7 @@
     - name: copy lastest distrib
       copy: src={{ nxt_local_folder }}/distrib/nxt.zip dest={{ nxt_remote_folder }}/distrib
     - name: unpack new version
-      shell: cd {{ nxt_remote_folder }} && rm -rf nxt && unzip distrib/nxt.zip 
+      shell: cd {{ nxt_remote_folder }} && rm -rf nxt && unzip distrib/nxt.zip
     - name: setup properties
       template: src={{ nxt_local_folder }}/templates/nxt.properties.j2 dest={{ nxt_remote_folder }}/nxt/conf/nxt.properties
 
@@ -94,8 +126,8 @@
   hosts: nxts
   gather_facts: no
   vars:
-    nxt_local_folder: ~/ansible/nxt
-    nxt_remote_folder: ~/nxt-kit
+    nxt_local_folder: ~/nxt-kit
+    nxt_remote_folder: ~/nxt-kit-deployed
   tasks:
   - name: copy check script
     template: src={{ nxt_local_folder }}/scripts-src/check.sh dest={{ nxt_remote_folder }}/sbin/check.nxt.sh mode=0744
