@@ -112,7 +112,7 @@
     - name: kill old nxt
       shell: pkill -f 'java \-jar start.jar'
       ignore_errors: yes
-    - name: kill nxt
+    - name: kill and wait nxt
       shell: while pgrep -f nxt.jar > /dev/null; do sleep 1; pkill -f 'nxt.jar'; done
       ignore_errors: yes
     - name: copy lastest distrib
