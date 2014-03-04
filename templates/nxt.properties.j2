@@ -28,6 +28,10 @@ nxt.apiServerPort={{ kit_apiServerPort }}
 nxt.enableUIServer={{ kit_enableUIServer }}
 {% endif %}
 
+{% if kit_uiServerPort is defined %}
+nxt.uiServerPort={{ kit_uiServerPort }}
+{% endif %}
+
 nxt.allowedUserHosts=*
 
 nxt.debug=true

@@ -54,6 +54,7 @@
     kit_peerServerPort: 8080
     kit_announcedPort: 80
     kit_apiServerPort: 27876
+    kit_uiServerPort: 27875
     kit_enableUIServer: "false"
   vars_prompt:
     - name: "secret_phrase"
