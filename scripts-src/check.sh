@@ -25,7 +25,7 @@ if (( $curr_block_id != 0 )); then
        echo "$(date) ERROR: I can't stand block $curr_block_id anymore" >> ../distrib/cron.log
        # Obsolete and will be removed
        pkill -f 'java -jar start.jar'
-       pkill -f 'nxt.jar'
+       while pgrep -f nxt.jar > /dev/null; do sleep 1; pkill -f 'nxt.jar'; done
        rm -f ../distrib/chain.tar.gz
     fi
   fi
@@ -33,7 +33,7 @@ else
   echo "$(date) ERROR: nxt is NOT running correctly" >> ../distrib/cron.log
   # Obsolete and will be removed
   pkill -f 'java -jar start.jar'
-  pkill -f 'nxt.jar'
+  while pgrep -f nxt.jar > /dev/null; do sleep 1; pkill -f 'nxt.jar'; done
   rm -rf nxt_db/ ../distrib/blockID ../distrib/blockCnt
   if [ -f ../distrib/chain.tar.gz ]; then
     echo "$(date) Restoring cached chain" >> ../distrib/cron.log

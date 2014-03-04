@@ -19,14 +19,14 @@
     when: p.stat.isdir is defined and p.stat.isdir == true
     notify:
     - kill old nxt
-    - kill nxt
+    - kill and wait nxt
     - move folder
   handlers:
     - name: kill old nxt
       shell: pkill -f 'java \-jar start.jar'
       ignore_errors: yes
-    - name: kill nxt
-      shell: pkill -f 'nxt.jar'
+    - name: kill and wait nxt
+      shell: while pgrep -f nxt.jar > /dev/null; do sleep 1; pkill -f 'nxt.jar'; done
       ignore_errors: yes
     - name: move folder
       shell: mv {{ nxt_remote_folder }} {{ nxt_remote_folder }}-deployed
@@ -100,7 +100,7 @@
     notify:
     - generate hallmark
     - kill old nxt
-    - kill nxt
+    - kill and wait nxt
     - copy lastest distrib
     - unpack new version
     - setup properties
@@ -113,7 +113,7 @@
       shell: pkill -f 'java \-jar start.jar'
       ignore_errors: yes
     - name: kill nxt
-      shell: pkill -f 'nxt.jar'
+      shell: while pgrep -f nxt.jar > /dev/null; do sleep 1; pkill -f 'nxt.jar'; done
       ignore_errors: yes
     - name: copy lastest distrib
       copy: src={{ nxt_local_folder }}/distrib/nxt.zip dest={{ nxt_remote_folder }}/distrib
