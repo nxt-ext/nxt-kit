@@ -55,6 +55,7 @@
   vars:
     nxt_local_folder: ~/nxt-kit
     nxt_remote_folder: ~/nxt-kit-deployed
+    nxt_is_stable_flag: "is-stable"
     hallmark_date: "2013-12-11"
     hallmark_weight: 100
     kit_ServerHost: "0.0.0.0"
@@ -94,17 +95,24 @@
   - name: copy original chain
     copy: src={{ nxt_local_folder }}/distrib/chain-original.tar.gz dest={{ nxt_remote_folder }}/distrib
     when: localmd5.results[0].stdout != remotemd5.results[0].stdout and localmd5.results[0].stdout != ""
+  - name: previous installation was successful
+    stat: path="{{ nxt_remote_folder ~ '/' ~ nxt_is_stable_flag }}"
+    register: p
   - name: remote runs different version
     shell: /bin/true
-    when: localmd5.results[1].stdout != remotemd5.results[1].stdout
+    when: localmd5.results[1].stdout != remotemd5.results[1].stdout or not p.stat.exists
     notify:
+    - mark installation unstable
     - generate hallmark
     - kill old nxt
     - kill and wait nxt
     - copy lastest distrib
     - unpack new version
     - setup properties
+    - mark installation stable
   handlers:
+    - name: mark installation unstable
+      file: path="{{ nxt_remote_folder ~ '/' ~ nxt_is_stable_flag }}" state=absent
     - name: generate hallmark
       local_action: command wget -qO- "http://127.0.0.1:7876/nxt" --post-data="requestType=markHost&secretPhrase={{ secret_phrase|urlencode }}&host={{ inventory_hostname }}&weight={{ hallmark_weight }}&date={{ hallmark_date }}"
       register: hallmark_result
@@ -117,10 +125,14 @@
       ignore_errors: yes
     - name: copy lastest distrib
       copy: src={{ nxt_local_folder }}/distrib/nxt.zip dest={{ nxt_remote_folder }}/distrib
+      when: localmd5.results[1].stdout != remotemd5.results[1].stdout
     - name: unpack new version
       shell: cd {{ nxt_remote_folder }} && rm -rf nxt && unzip distrib/nxt.zip
     - name: setup properties
       template: src={{ nxt_local_folder }}/templates/nxt.properties.j2 dest={{ nxt_remote_folder }}/nxt/conf/nxt.properties
+    - name: mark installation stable
+      shell: "echo `date` > {{ nxt_remote_folder ~ '/' ~ nxt_is_stable_flag }}"
+
 
 - name: ensure check script @ cron
   hosts: nxts
