@@ -18,7 +18,8 @@ ln -sf nxt-client-0.8.7.zip nxt.zip
 ansible-playbook -f 10 -v ~/nxt-kit/playbooks/deploy.yml
 ```
 
-You should execute OpenShift's playbook from specific folder due to RedHat's limitations.
+You should execute OpenShift's playbook from specific folder due to RedHat's limitations.  
+Standart playbook should be executed from any folder **except** OpenShift's.
 ```
 cd ~/nxt-kit/playbooks/openshift
 ansible-playbook -f 10 -v deploy.yml
@@ -26,7 +27,7 @@ ansible-playbook -f 10 -v deploy.yml
 
 ## Installation
 ### On managed VPS nodes
-1. Satisty [these requirements](http://docs.ansible.com/intro_installation.html#managed-node-requirements). For latest Debian/RedHat it would work out of the box.
+1. Satisfy [these requirements](http://docs.ansible.com/intro_installation.html#managed-node-requirements). For latest Debian/RedHat it would work out of the box.
 2. Configure SSH access using [key authentication](http://lmgtfy.com/?q=ssh+key+authentication) without password.
 3. If you are **not** paranoid
   * add user to [sudo with NOPASSWD](http://lmgtfy.com/?q=sudo+nopasswd+all+commands) for all commands.
@@ -45,7 +46,7 @@ ansible-playbook -f 10 -v deploy.yml
 ### On control machine
 1. Install [ansible](http://docs.ansible.com/intro_installation.html#installing-the-control-machine) and [openssh-client](http://lmgtfy.com/?q=how+to+install+openssh-client+on+linux).
 2. [Add](https://forums.nxtcrypto.org/viewtopic.php?p=1064#p1064) your servers to [inventory group](http://www.ansibleworks.com/docs/intro_inventory.html) `nxts`.
-3. Add your openshifts to inventory group `openshifts`. Don't forget to set [ansible_ssh_user](https://forums.nxtcrypto.org/viewtopic.php?p=3688#p3688).
+3. Add your OpenShifts to inventory group `openshifts`. Don't forget to set [ansible_ssh_user](https://forums.nxtcrypto.org/viewtopic.php?p=3688#p3688).
 4. Add `exec ssh-agent bash` to the end of `~/.profile`.
 5. SSH to each of your managed node (to cache their public keys).
 6. Add `ssh-add ~/.ssh/PRIVATE-KEY-FOR-REMOTE-SERVER > /dev/null 2>&1` to the end of the `~/.bashrc` *for each* remote server.
