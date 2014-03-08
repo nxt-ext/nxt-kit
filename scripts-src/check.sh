@@ -1,11 +1,11 @@
 #!/bin/bash
 if [[ "`pidof -x $(basename $0) -o %PPID`" ]]; then exit 0; fi
-log_file="../distrib/cron-{{ nxt_conf_folder }}.log"
-block_id_file="../distrib/block-{{ nxt_conf_folder }}-ID"
-block_cnt_file="../distrib/block-{{ nxt_conf_folder }}-Cnt"
+log_file="../distrib/cron-{{ nxt_conf_name }}.log"
+block_id_file="../distrib/block-{{ nxt_conf_name }}-ID"
+block_cnt_file="../distrib/block-{{ nxt_conf_name }}-Cnt"
 db_folder="nxt_db/"
-chain_cached_arc="../distrib/chain-cached-{{ nxt_conf_folder }}.tar.gz"
-chain_origin_arc="../distrib/chain-original-{{ nxt_conf_folder }}.tar.gz"
+chain_cached_arc="../distrib/chain-cached-{{ nxt_conf_name }}.tar.gz"
+chain_origin_arc="../distrib/chain-original-{{ nxt_conf_name }}.tar.gz"
 cd {{ nxt_remote_folder }}/nxt
 typeset -i curr_block_id=$(wget -qO- http://{{ (kit_ServerHost.stdout|default(kit_ServerHost)) if kit_ServerHost is defined else "localhost" }}:{{ kit_apiServerPort if kit_apiServerPort is defined else 7876 }}/nxt?requestType=getState | grep -oP '"numberOfBlocks":\d+' | awk -F ":" '{print $2}')
 if (( $curr_block_id != 0 )); then
@@ -31,7 +31,7 @@ if (( $curr_block_id != 0 )); then
        echo "$(date) ERROR: I can't stand block $curr_block_id anymore" >> $log_file
        # Obsolete and will be removed
        pkill -f 'java -jar start.jar'
-       pkill -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_folder }} ' && while pgrep -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_folder }} ' > /dev/null; do sleep 1; done
+       pkill -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
        rm -f $chain_cached_arc
     fi
   fi
@@ -39,7 +39,7 @@ else
   echo "$(date) ERROR: nxt is NOT running correctly" >> $log_file
   # Obsolete and will be removed
   pkill -f 'java -jar start.jar'
-  pkill -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_folder }} ' && while pgrep -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_folder }} ' > /dev/null; do sleep 1; done
+  pkill -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
   rm -rf $db_folder $block_id_file $block_cnt_file
   if [ -f $chain_cached_arc ]; then
     echo "$(date) Restoring cached chain" >> $log_file
@@ -49,7 +49,7 @@ else
     echo "$(date) Restoring original chain" >> $log_file
     tar -xzvf $chain_origin_arc
   fi
-  nohup java -cp nxt.jar:lib/*:{{ nxt_conf_folder }} nxt.Nxt > /dev/null 2>&1 &
+  nohup java -cp nxt.jar:lib/*:{{ nxt_conf_name }} nxt.Nxt > /dev/null 2>&1 &
   # Restoing sometimes requires more time than 1 minute
   sleep 250
 #  nxt_pid=$!

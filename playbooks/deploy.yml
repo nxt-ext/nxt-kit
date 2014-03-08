@@ -5,7 +5,7 @@
   vars:
     nxt_local_folder: ~/nxt-kit
     nxt_remote_folder: ~/nxt-kit
-    nxt_conf_folder: "conf"
+    nxt_conf_name: "conf"
   tasks:
   - name: uncron check script
     cron: name="is nxt running" state=absent
@@ -27,7 +27,7 @@
       shell: pkill -f 'java \-jar start.jar'
       ignore_errors: yes
     - name: kill and wait nxt
-      shell: pkill -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_folder }} ' && while pgrep -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_folder }} ' > /dev/null; do sleep 1; done
+      shell: pkill -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
       ignore_errors: yes
     - name: move folder
       shell: mv {{ nxt_remote_folder }} {{ nxt_remote_folder }}-deployed
@@ -56,7 +56,7 @@
   vars:
     nxt_local_folder: ~/nxt-kit
     nxt_remote_folder: ~/nxt-kit-deployed
-    nxt_conf_folder: "conf"
+    nxt_conf_name: "conf"
     nxt_is_stable_flag: "is-stable"
     hallmark_date: "2013-12-11"
     hallmark_weight: 100
@@ -71,13 +71,13 @@
   - name: uncron general check script
     cron: name="is nxt running" state=absent
   - name: uncron check script
-    cron: name="is nxt-{{ nxt_conf_folder }} running" state=absent
+    cron: name="is nxt-{{ nxt_conf_name }} running" state=absent
     # Obsolete and will be removed
   - name: kill general check script
     shell: pkill -f 'check.nxt.sh'
     ignore_errors: yes
   - name: kill check script
-    shell: pkill -f 'check-nxt-{{ nxt_conf_folder }}.sh'
+    shell: pkill -f 'check-nxt-{{ nxt_conf_name }}.sh'
     ignore_errors: yes
   - name: check remote folders
     file: path={{ item }} state=directory owner={{ ansible_ssh_user }} mode=0744
@@ -86,26 +86,26 @@
       - "{{ nxt_remote_folder }}/distrib"
       - "{{ nxt_remote_folder }}/sbin"
   - name: remove cached chain
-    file: path="{{ nxt_remote_folder }}/distrib/chain-cached-{{ nxt_conf_folder }}.tar.gz" state=absent
+    file: path="{{ nxt_remote_folder }}/distrib/chain-cached-{{ nxt_conf_name }}.tar.gz" state=absent
   # Will be removed
   - name: move local chain original
-    local_action: shell if [ -f {{ nxt_local_folder }}/distrib/chain-original.tar.gz ]; then mv {{ nxt_local_folder }}/distrib/chain-original.tar.gz  {{ nxt_local_folder }}/distrib/chain-original-{{ nxt_conf_folder }}.tar.gz; fi
+    local_action: shell if [ -f {{ nxt_local_folder }}/distrib/chain-original.tar.gz ]; then mv {{ nxt_local_folder }}/distrib/chain-original.tar.gz  {{ nxt_local_folder }}/distrib/chain-original-{{ nxt_conf_name }}.tar.gz; fi
   - name: calculate local md5
     local_action: shell /usr/bin/md5sum {{ nxt_local_folder }}/distrib/{{ item }} | awk '{print $1;}'
     with_items:
-      - "chain-original-{{ nxt_conf_folder }}.tar.gz"
+      - "chain-original-{{ nxt_conf_name }}.tar.gz"
       - "nxt.zip"
     changed_when: false
     register: localmd5
   - name: calculate remote md5
     shell: /usr/bin/md5sum {{ nxt_remote_folder }}/distrib/{{ item }} | awk '{print $1;}'
     with_items:
-      - "chain-original-{{ nxt_conf_folder }}.tar.gz"
+      - "chain-original-{{ nxt_conf_name }}.tar.gz"
       - "nxt.zip"
     changed_when: false
     register: remotemd5
   - name: copy original chain
-    copy: src={{ nxt_local_folder }}/distrib/chain-original.tar.gz dest={{ nxt_remote_folder }}/distrib/chain-original-{{ nxt_conf_folder }}.tar.gz
+    copy: src={{ nxt_local_folder }}/distrib/chain-original.tar.gz dest={{ nxt_remote_folder }}/distrib/chain-original-{{ nxt_conf_name }}.tar.gz
     when: localmd5.results[0].stdout != remotemd5.results[0].stdout and localmd5.results[0].stdout != ""
   - name: previous installation was successful
     stat: path="{{ nxt_remote_folder ~ '/' ~ nxt_is_stable_flag }}"
@@ -133,7 +133,7 @@
       shell: pkill -f 'java \-jar start.jar'
       ignore_errors: yes
     - name: kill and wait nxt
-      shell: pkill -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_folder }} ' && while pgrep -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_folder }} ' > /dev/null; do sleep 1; done
+      shell: pkill -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
       ignore_errors: yes
     - name: copy lastest distrib
       copy: src={{ nxt_local_folder }}/distrib/nxt.zip dest={{ nxt_remote_folder }}/distrib
@@ -141,7 +141,7 @@
     - name: unpack new version
       shell: cd {{ nxt_remote_folder }} && rm -rf nxt && unzip distrib/nxt.zip
     - name: setup properties
-      template: src={{ nxt_local_folder }}/templates/nxt.properties.j2 dest={{ nxt_remote_folder }}/nxt/{{ nxt_conf_folder }}/nxt.properties
+      template: src={{ nxt_local_folder }}/templates/nxt.properties.j2 dest={{ nxt_remote_folder }}/nxt/{{ nxt_conf_name }}/nxt.properties
     - name: mark installation stable
       shell: "echo `date` > {{ nxt_remote_folder ~ '/' ~ nxt_is_stable_flag }}"
 
@@ -152,9 +152,9 @@
   vars:
     nxt_local_folder: ~/nxt-kit
     nxt_remote_folder: ~/nxt-kit-deployed
-    nxt_conf_folder: "conf"
+    nxt_conf_name: "conf"
   tasks:
   - name: copy check script
-    template: src={{ nxt_local_folder }}/scripts-src/check.sh dest={{ nxt_remote_folder }}/sbin/check-nxt-{{ nxt_conf_folder }}.sh mode=0744
+    template: src={{ nxt_local_folder }}/scripts-src/check.sh dest={{ nxt_remote_folder }}/sbin/check-nxt-{{ nxt_conf_name }}.sh mode=0744
   - name: cron check script
-    cron: name="is nxt-{{ nxt_conf_folder }} running" job="{{ nxt_remote_folder }}/sbin/check-nxt-{{ nxt_conf_folder }}.sh" minute="*/3"
+    cron: name="is nxt-{{ nxt_conf_name }} running" job="{{ nxt_remote_folder }}/sbin/check-nxt-{{ nxt_conf_name }}.sh" minute="*/3"
