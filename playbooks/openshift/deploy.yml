@@ -75,22 +75,28 @@
   - name: kill check script
     shell: pkill -f 'check.nxt.sh'
     ignore_errors: yes
+  # Will be removed
+  - name: move local chain original
+    local_action: shell cd {{ nxt_local_folder }}/distrib && if [ -f chain-original.tar.gz ]; then mv chain-original.tar.gz chain-original-{{ nxt_conf_name }}.tar.gz; fi
   - name: calculate local md5
     local_action: shell /usr/bin/md5sum {{ nxt_local_folder }}/distrib/{{ item }} | awk '{print $1;}'
     with_items:
-      - "chain-original.tar.gz"
+      - "chain-original-{{ nxt_conf_name }}.tar.gz"
       - "nxt.zip"
     changed_when: false
     register: localmd5
+  # Will be removed
+  - name: move remote chain original
+    shell: cd {{ nxt_remote_folder }}/distrib && if [ -f chain-original.tar.gz ]; then mv chain-original.tar.gz chain-original-{{ nxt_conf_name }}.tar.gz; fi
   - name: calculate remote md5
     shell: /usr/bin/md5sum {{ nxt_remote_folder }}/distrib/{{ item }} | awk '{print $1;}'
     with_items:
-      - "chain-original.tar.gz"
+      - "chain-original-{{ nxt_conf_name }}.tar.gz"
       - "nxt.zip"
     changed_when: false
     register: remotemd5
   - name: copy original chain
-    copy: src={{ nxt_local_folder }}/distrib/chain-original.tar.gz dest={{ nxt_remote_folder }}/distrib
+    copy: src={{ nxt_local_folder }}/distrib/chain-original-{{ nxt_conf_name }}.tar.gz dest={{ nxt_remote_folder }}/distrib
     when: localmd5.results[0].stdout != remotemd5.results[0].stdout and localmd5.results[0].stdout != ""
   - name: previous installation was successful
     stat: path="{{ nxt_remote_folder ~ '/' ~ nxt_is_stable_flag }}"
