@@ -67,10 +67,17 @@
       default: ""
       private: yes
   tasks:
-  - name: uncron check script
+  # Obsolete and will be removed
+  - name: uncron general check script
     cron: name="is nxt running" state=absent
-  - name: kill check script
+  - name: uncron check script
+    cron: name="is nxt-{{ nxt_conf_folder }} running" state=absent
+    # Obsolete and will be removed
+  - name: kill general check script
     shell: pkill -f 'check.nxt.sh'
+    ignore_errors: yes
+  - name: kill check script
+    shell: pkill -f 'check-nxt-{{ nxt_conf_folder }}.sh'
     ignore_errors: yes
   - name: check remote folders
     file: path={{ item }} state=directory owner={{ ansible_ssh_user }} mode=0744
@@ -79,23 +86,26 @@
       - "{{ nxt_remote_folder }}/distrib"
       - "{{ nxt_remote_folder }}/sbin"
   - name: remove cached chain
-    file: path="{{ nxt_remote_folder }}/distrib/chain.tar.gz" state=absent
+    file: path="{{ nxt_remote_folder }}/distrib/chain-cached-{{ nxt_conf_folder }}.tar.gz" state=absent
+  # Will be removed
+  - name: move local chain original
+    local_action: shell if [ -f {{ nxt_local_folder }}/distrib/chain-original.tar.gz ]; then mv {{ nxt_local_folder }}/distrib/chain-original.tar.gz  {{ nxt_local_folder }}/distrib/chain-original-{{ nxt_conf_folder }}.tar.gz; fi
   - name: calculate local md5
     local_action: shell /usr/bin/md5sum {{ nxt_local_folder }}/distrib/{{ item }} | awk '{print $1;}'
     with_items:
-      - "chain-original.tar.gz"
+      - "chain-original-{{ nxt_conf_folder }}.tar.gz"
       - "nxt.zip"
     changed_when: false
     register: localmd5
   - name: calculate remote md5
     shell: /usr/bin/md5sum {{ nxt_remote_folder }}/distrib/{{ item }} | awk '{print $1;}'
     with_items:
-      - "chain-original.tar.gz"
+      - "chain-original-{{ nxt_conf_folder }}.tar.gz"
       - "nxt.zip"
     changed_when: false
     register: remotemd5
   - name: copy original chain
-    copy: src={{ nxt_local_folder }}/distrib/chain-original.tar.gz dest={{ nxt_remote_folder }}/distrib
+    copy: src={{ nxt_local_folder }}/distrib/chain-original.tar.gz dest={{ nxt_remote_folder }}/distrib/chain-original-{{ nxt_conf_folder }}.tar.gz
     when: localmd5.results[0].stdout != remotemd5.results[0].stdout and localmd5.results[0].stdout != ""
   - name: previous installation was successful
     stat: path="{{ nxt_remote_folder ~ '/' ~ nxt_is_stable_flag }}"
@@ -145,6 +155,6 @@
     nxt_conf_folder: "conf"
   tasks:
   - name: copy check script
-    template: src={{ nxt_local_folder }}/scripts-src/check.sh dest={{ nxt_remote_folder }}/sbin/check.nxt.sh mode=0744
+    template: src={{ nxt_local_folder }}/scripts-src/check.sh dest={{ nxt_remote_folder }}/sbin/check-nxt-{{ nxt_conf_folder }}.sh mode=0744
   - name: cron check script
-    cron: name="is nxt running" job="{{ nxt_remote_folder }}/sbin/check.nxt.sh" minute="*/3"
+    cron: name="is nxt-{{ nxt_conf_folder }} running" job="{{ nxt_remote_folder }}/sbin/check-nxt-{{ nxt_conf_folder }}.sh" minute="*/3"

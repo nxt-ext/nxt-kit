@@ -1,47 +1,53 @@
 #!/bin/bash
 if [[ "`pidof -x $(basename $0) -o %PPID`" ]]; then exit 0; fi
+log_file="../distrib/cron-{{ nxt_conf_folder }}.log"
+block_id_file="../distrib/block-{{ nxt_conf_folder }}-ID"
+block_cnt_file="../distrib/block-{{ nxt_conf_folder }}-Cnt"
+db_folder="nxt_db/"
+chain_cached_arc="../distrib/chain-cached-{{ nxt_conf_folder }}.tar.gz"
+chain_origin_arc="../distrib/chain-original-{{ nxt_conf_folder }}.tar.gz"
 cd {{ nxt_remote_folder }}/nxt
 typeset -i curr_block_id=$(wget -qO- http://{{ (kit_ServerHost.stdout|default(kit_ServerHost)) if kit_ServerHost is defined else "localhost" }}:{{ kit_apiServerPort if kit_apiServerPort is defined else 7876 }}/nxt?requestType=getState | grep -oP '"numberOfBlocks":\d+' | awk -F ":" '{print $2}')
 if (( $curr_block_id != 0 )); then
   prev_block_id=0
-  if [ -f ../distrib/blockID ]; then
-      typeset -i prev_block_id=$(cat ../distrib/blockID)
+  if [ -f $block_id_file ]; then
+      typeset -i prev_block_id=$(cat $block_id_file)
   fi
   if (( $curr_block_id != $prev_block_id )); then
-    echo "$(date) OK: caching chain with block $curr_block_id" >> ../distrib/cron.log
-    echo $curr_block_id > ../distrib/blockID
-    echo 1 > ../distrib/blockCnt
-    tar -czvf ../distrib/chain.tar.gz nxt_db/
+    echo "$(date) OK: caching chain with block $curr_block_id" >> $log_file
+    echo $curr_block_id > $block_id_file
+    echo 1 > $block_cnt_file
+    tar -czvf $chain_cached_arc $db_folder
   else
     prev_block_cnt=0
-    if [ -f ../distrib/blockCnt ]; then
-        typeset -i prev_block_cnt=$(cat ../distrib/blockCnt)
+    if [ -f $block_cnt_file ]; then
+        typeset -i prev_block_cnt=$(cat $block_cnt_file)
     fi
     if (( $prev_block_cnt < 60 )); then
       ((prev_block_cnt++))
-      echo $prev_block_cnt > ../distrib/blockCnt
-      echo "$(date) OK: block $curr_block_id repeated $prev_block_cnt times" >> ../distrib/cron.log
+      echo $prev_block_cnt > $block_cnt_file
+      echo "$(date) OK: block $curr_block_id repeated $prev_block_cnt times" >> $log_file
     else
-       echo "$(date) ERROR: I can't stand block $curr_block_id anymore" >> ../distrib/cron.log
+       echo "$(date) ERROR: I can't stand block $curr_block_id anymore" >> $log_file
        # Obsolete and will be removed
        pkill -f 'java -jar start.jar'
        pkill -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_folder }} ' && while pgrep -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_folder }} ' > /dev/null; do sleep 1; done
-       rm -f ../distrib/chain.tar.gz
+       rm -f $chain_cached_arc
     fi
   fi
 else
-  echo "$(date) ERROR: nxt is NOT running correctly" >> ../distrib/cron.log
+  echo "$(date) ERROR: nxt is NOT running correctly" >> $log_file
   # Obsolete and will be removed
   pkill -f 'java -jar start.jar'
   pkill -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_folder }} ' && while pgrep -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_folder }} ' > /dev/null; do sleep 1; done
-  rm -rf nxt_db/ ../distrib/blockID ../distrib/blockCnt
-  if [ -f ../distrib/chain.tar.gz ]; then
-    echo "$(date) Restoring cached chain" >> ../distrib/cron.log
-    tar -xzvf ../distrib/chain.tar.gz
-    rm -f ../distrib/chain.tar.gz
-  elif [ -f ../distrib/chain-original.tar.gz ]; then
-    echo "$(date) Restoring original chain" >> ../distrib/cron.log
-    tar -xzvf ../distrib/chain-original.tar.gz
+  rm -rf $db_folder $block_id_file $block_cnt_file
+  if [ -f $chain_cached_arc ]; then
+    echo "$(date) Restoring cached chain" >> $log_file
+    tar -xzvf $chain_cached_arc
+    rm -f $chain_cached_arc
+  elif [ -f $chain_origin_arc ]; then
+    echo "$(date) Restoring original chain" >> $log_file
+    tar -xzvf $chain_origin_arc
   fi
   nohup java -cp nxt.jar:lib/*:{{ nxt_conf_folder }} nxt.Nxt > /dev/null 2>&1 &
   # Restoing sometimes requires more time than 1 minute
