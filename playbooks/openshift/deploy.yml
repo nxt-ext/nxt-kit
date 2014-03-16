@@ -28,7 +28,7 @@
       shell: pkill -f 'java \-jar start.jar'
       ignore_errors: yes
     - name: kill and wait nxt
-      shell: pkill -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
+      shell: pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
       ignore_errors: yes
     - name: move folder
       shell: mv {{ nxt_remote_folder }} {{ nxt_remote_folder }}-deployed
@@ -126,7 +126,7 @@
       shell: pkill -f 'java \-jar start.jar'
       ignore_errors: yes
     - name: kill and wait nxt
-      shell: pkill -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
+      shell: pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
       ignore_errors: yes
     - name: copy lastest distrib
       copy: src={{ nxt_local_folder }}/distrib/nxt.zip dest={{ nxt_remote_folder }}/distrib

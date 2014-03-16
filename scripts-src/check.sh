@@ -31,7 +31,7 @@ if (( $curr_block_id != 0 )); then
        echo "$(date) ERROR: I can't stand block $curr_block_id anymore" >> $log_file
        # Obsolete and will be removed
        pkill -f 'java -jar start.jar'
-       pkill -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
+       pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
        rm -f $chain_cached_arc
     fi
   fi
@@ -39,7 +39,7 @@ else
   echo "$(date) ERROR: nxt is NOT running correctly" >> $log_file
   # Obsolete and will be removed
   pkill -f 'java -jar start.jar'
-  pkill -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
+  pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
   rm -rf $db_folder $block_id_file $block_cnt_file
   if [ -f $chain_cached_arc ]; then
     echo "$(date) Restoring cached chain" >> $log_file
@@ -49,7 +49,7 @@ else
     echo "$(date) Restoring original chain" >> $log_file
     tar -xzvf $chain_origin_arc
   fi
-  nohup java -cp nxt.jar:lib/*:{{ nxt_conf_name }} nxt.Nxt > /dev/null 2>&1 &
+  nohup java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} nxt.Nxt > /dev/null 2>&1 &
   # Restoing sometimes requires more time than 1 minute
   sleep 250
 #  nxt_pid=$!
