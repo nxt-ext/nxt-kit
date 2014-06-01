@@ -156,8 +156,8 @@
     register: kit_ServerHost
   - name: cron
     template: src={{ nxt_local_folder }}/scripts-src/check.sh dest={{ nxt_cron_folder }}/check.nxt.sh mode=0744
-  - name: set check every 10 minutes
-    shell: sed -i '2i if (( $(date "+%M") % 10 )); then exit 0; fi' {{ nxt_cron_folder }}/check.nxt.sh
+  - name: set check every 30 minutes
+    shell: sed -i '2i if (( $(date "+%M") % 30 )); then exit 0; fi' {{ nxt_cron_folder }}/check.nxt.sh
   - name: remove sleep
     shell: sed -i '/sleep/d' {{ nxt_cron_folder }}/check.nxt.sh
   - name: remove unsupported anti-parallel execution workaround
