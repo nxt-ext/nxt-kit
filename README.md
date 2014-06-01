@@ -12,9 +12,7 @@ To deploy new version of Nxt, download it locally to distrib/ folder, [check](ht
 
 ```
 cd ~/nxt-kit/distrib
-wget http://download.nxtcrypto.org/nxt-client-0.8.7.zip # replace with the latest version
-sha256sum nxt-client-0.8.7.zip # check
-ln -sf nxt-client-0.8.7.zip nxt.zip
+./safe-nxt-download.sh 1.1.4 # replace with the latest version. CHECK FOR OK
 ansible-playbook -f 10 -v ~/nxt-kit/playbooks/deploy.yml
 ```
 
