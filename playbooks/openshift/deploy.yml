@@ -1,38 +1,4 @@
 ---
-- name: move nxt-kit to new folder
-  hosts: openshifts
-  gather_facts: no
-  vars:
-    nxt_local_folder: ~/nxt-kit
-    nxt_remote_folder: ~/app-root/data/nxt-kit
-    nxt_conf_name: "conf"
-    nxt_cron_folder: ~/app-root/runtime/repo/.openshift/cron/minutely
-  tasks:
-  - name: uncron check script
-    file: path="{{ nxt_cron_folder }}/check.nxt.sh" state=absent
-  - name: kill check script
-    shell: pkill -f 'check.nxt.sh'
-    ignore_errors: yes
-  - name: previous installation exists
-    stat: path="{{ nxt_remote_folder }}"
-    register: p
-  - name: remote runs previous version of nxt-kit
-    shell: /bin/true
-    when: p.stat.isdir is defined and p.stat.isdir == true
-    notify:
-    - kill old nxt
-    - kill and wait nxt
-    - move folder
-  handlers:
-    - name: kill old nxt
-      shell: pkill -f 'java \-jar start.jar'
-      ignore_errors: yes
-    - name: kill and wait nxt
-      shell: pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
-      ignore_errors: yes
-    - name: move folder
-      shell: mv {{ nxt_remote_folder }} {{ nxt_remote_folder }}-deployed
-
 - name: break default app on 8080 port
   hosts: openshifts
   gather_facts: no
@@ -75,9 +41,6 @@
   - name: kill check script
     shell: pkill -f 'check.nxt.sh'
     ignore_errors: yes
-  # Will be removed
-  - name: move local chain original
-    local_action: shell cd {{ nxt_local_folder }}/distrib && if [ -f chain-original.tar.gz ]; then mv chain-original.tar.gz chain-original-{{ nxt_conf_name }}.tar.gz; fi
   - name: calculate local md5
     local_action: shell /usr/bin/md5sum {{ nxt_local_folder }}/distrib/{{ item }} | awk '{print $1;}'
     with_items:
@@ -85,9 +48,6 @@
       - "nxt.zip"
     changed_when: false
     register: localmd5
-  # Will be removed
-  - name: move remote chain original
-    shell: cd {{ nxt_remote_folder }}/distrib && if [ -f chain-original.tar.gz ]; then mv chain-original.tar.gz chain-original-{{ nxt_conf_name }}.tar.gz; fi
   - name: calculate remote md5
     shell: /usr/bin/md5sum {{ nxt_remote_folder }}/distrib/{{ item }} | awk '{print $1;}'
     with_items:
@@ -107,7 +67,6 @@
     notify:
     - mark installation unstable
     - generate hallmark
-    - kill old nxt
     - kill and wait nxt
     - copy lastest distrib
     - unpack new version
@@ -121,10 +80,6 @@
       local_action: command wget -qO- "http://127.0.0.1:7876/nxt" --post-data="requestType=markHost&secretPhrase={{ secret_phrase|urlencode }}&host={{ inventory_hostname }}&weight={{ hallmark_weight }}&date={{ hallmark_date }}"
       register: hallmark_result
       when: secret_phrase != ""
-    # Obsolete and will be removed
-    - name: kill old nxt
-      shell: pkill -f 'java \-jar start.jar'
-      ignore_errors: yes
     - name: kill and wait nxt
       shell: pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
       ignore_errors: yes
