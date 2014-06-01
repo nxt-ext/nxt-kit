@@ -55,7 +55,9 @@ ansible-playbook -f 10 -v deploy.yml
   * Remove [dependency install block](https://github.com/nxt-ext/nxt-kit/blob/c546771aad40b52eb113f8dbe368076f2df064b4/playbooks/deploy.yml#L34-L50) from `~/nxt-kit/playbooks/deploy.yml`.
  
 ## Contacts
-Check official [forum thread](https://forums.nxtcrypto.org/viewtopic.php?f=39&t=230), irc channel [#nxtalk](https://bitcointalk.org/index.php?topic=345619.msg5410724#msg5410724) or PM me (EmoneyRu) on [BCT](https://bitcointalk.org/index.php?action=profile;u=125071;sa=summary) or [NXTCrypto](https://forums.nxtcrypto.org/memberlist.php?mode=viewprofile&u=212). 
+PM me (EmoneyRu) on [BCT](https://bitcointalk.org/index.php?action=profile;u=125071;sa=summary) or [NXT Forum](https://nxtforum.org/index.php?action=profile;u=300). 
 
 ## Donations
-NXT: [999992273311888788](http://87.230.14.1/nxt/nxt.cgi?action=3000&acc=999992273311888788)
+* [NXT-9XEN-PLLG-RUW8-2H7SV](http://87.230.14.1/nxt/nxt.cgi?action=3000&acc=999992273311888788)
+* [999992273311888788](http://87.230.14.1/nxt/nxt.cgi?action=3000&acc=999992273311888788)
+
