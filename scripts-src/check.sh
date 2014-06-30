@@ -7,17 +7,31 @@ db_folder="nxt_db/"
 chain_cached_arc="../distrib/chain-cached-{{ nxt_conf_name }}.tar.gz"
 chain_origin_arc="../distrib/chain-original-{{ nxt_conf_name }}.tar.gz"
 cd {{ nxt_remote_folder }}/nxt
-typeset -i curr_block_id=$(wget -qO- http://{{ (kit_ServerHost.stdout|default(kit_ServerHost)) if kit_ServerHost is defined else "localhost" }}:{{ kit_apiServerPort if kit_apiServerPort is defined else 7876 }}/nxt?requestType=getState | grep -oP '"numberOfBlocks":\d+' | awk -F ":" '{print $2}')
+api_url='http://{{ (kit_ServerHost.stdout|default(kit_ServerHost)) if kit_ServerHost is defined else "localhost" }}:{{ kit_apiServerPort if kit_apiServerPort is defined else 7876 }}/nxt?requestType'
+typeset -i curr_block_id=$(wget -qO- $api_url=getState | grep -oP '"numberOfBlocks":\d+' | awk -F ":" '{print $2}')
 if (( $curr_block_id != 0 )); then
   prev_block_id=0
   if [ -f $block_id_file ]; then
       typeset -i prev_block_id=$(cat $block_id_file)
   fi
   if (( $curr_block_id != $prev_block_id )); then
-    echo "$(date) OK: caching chain with block $curr_block_id" >> $log_file
-    echo $curr_block_id > $block_id_file
-    echo 1 > $block_cnt_file
-    tar -czvf $chain_cached_arc $db_folder
+    block_address=$(wget -qO- $api_url=getState | grep -oP '"lastBlock":"\d+"' | awk -F ":" '{print $2}' | sed 's/"//g')
+    declare -A recent_blocks_owners
+    for i in {1..5}
+    do
+      recent_blocks_owners[$(wget -qO- $api_url=getBlock\&block=$block_address | grep -oP '"generator":"\d+"' | awk -F ":" '{print $2}' | sed 's/"//g')]='+'
+      block_address=$(wget -qO- $api_url=getBlock\&block=$block_address | grep -oP '"previousBlock":"\d+"' | awk -F ":" '{print $2}' | sed 's/"//g')
+    done
+    if (( {{ '${#recent_blocks_owners[@]}' }} <= 1 )); then
+      echo "$(date) ERROR: The latest generator is too lucky. Looks like a fork" >> $log_file
+      pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
+      rm -f $chain_cached_arc
+    else
+      echo "$(date) OK: caching chain with block $curr_block_id" >> $log_file
+      echo $curr_block_id > $block_id_file
+      echo 1 > $block_cnt_file
+      tar -czvf $chain_cached_arc $db_folder
+    fi
   else
     prev_block_cnt=0
     if [ -f $block_cnt_file ]; then
@@ -28,17 +42,13 @@ if (( $curr_block_id != 0 )); then
       echo $prev_block_cnt > $block_cnt_file
       echo "$(date) OK: block $curr_block_id repeated $prev_block_cnt times" >> $log_file
     else
-       echo "$(date) ERROR: I can't stand block $curr_block_id anymore" >> $log_file
-       # Obsolete and will be removed
-       pkill -f 'java -jar start.jar'
-       pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
-       rm -f $chain_cached_arc
+      echo "$(date) ERROR: I can't stand block $curr_block_id anymore" >> $log_file
+      pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
+      rm -f $chain_cached_arc
     fi
   fi
 else
   echo "$(date) ERROR: nxt is NOT running correctly" >> $log_file
-  # Obsolete and will be removed
-  pkill -f 'java -jar start.jar'
   pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
   rm -rf $db_folder $block_id_file $block_cnt_file
   if [ -f $chain_cached_arc ]; then
@@ -51,7 +61,7 @@ else
   fi
   nohup java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} nxt.Nxt > /dev/null 2>&1 &
   # Restoing sometimes requires more time than 1 minute
-  sleep 250
+  sleep 1000
 #  nxt_pid=$!
 #  typeset -i nxt_start_time=$(date +%s)
 #  tail -f ../distrib/nohup.log | while read LOGLINE
