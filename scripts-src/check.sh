@@ -16,21 +16,21 @@ if (( $curr_block_id != 0 )); then
   fi
   if (( $curr_block_id != $prev_block_id )); then
     block_address=$(wget -qO- $api_url=getState | grep -oP '"lastBlock":"\d+"' | awk -F ":" '{print $2}' | sed 's/"//g')
-    declare -A recent_blocks_owners
+    declare -A recent_blocks_generators
     for i in {1..5}
     do
-      recent_blocks_owners[$(wget -qO- $api_url=getBlock\&block=$block_address | grep -oP '"generator":"\d+"' | awk -F ":" '{print $2}' | sed 's/"//g')]='+'
+      recent_blocks_generators[$(wget -qO- $api_url=getBlock\&block=$block_address | grep -oP '"generator":"\d+"' | awk -F ":" '{print $2}' | sed 's/"//g')]='+'
       block_address=$(wget -qO- $api_url=getBlock\&block=$block_address | grep -oP '"previousBlock":"\d+"' | awk -F ":" '{print $2}' | sed 's/"//g')
     done
-    if (( {{ '${#recent_blocks_owners[@]}' }} <= 1 )); then
-      echo "$(date) ERROR: The latest generator is too lucky. Looks like a fork" >> $log_file
-      pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
-      rm -f $chain_cached_arc
-    else
+    if (( {{ '${#recent_blocks_generators[@]}' }} > 1 )); then
       echo "$(date) OK: caching chain with block $curr_block_id" >> $log_file
       echo $curr_block_id > $block_id_file
       echo 1 > $block_cnt_file
       tar -czvf $chain_cached_arc $db_folder
+    else
+      echo "$(date) ERROR: The latest generator is too lucky. Looks like a fork" >> $log_file
+      pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
+      rm -f $chain_cached_arc
     fi
   else
     prev_block_cnt=0
@@ -42,7 +42,7 @@ if (( $curr_block_id != 0 )); then
       echo $prev_block_cnt > $block_cnt_file
       echo "$(date) OK: block $curr_block_id repeated $prev_block_cnt times" >> $log_file
     else
-      echo "$(date) ERROR: I can't stand block $curr_block_id anymore" >> $log_file
+      echo "$(date) ERROR: I can't stand block $curr_block_id any longer" >> $log_file
       pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
       rm -f $chain_cached_arc
     fi
