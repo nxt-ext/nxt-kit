@@ -61,6 +61,9 @@
       - "nxt.zip"
     changed_when: false
     register: remotemd5
+  - name: delete original chain
+    file: path="{{ nxt_local_folder }}/distrib/chain-original-{{ nxt_conf_name }}.tar.gz" state=absent
+    when: localmd5.results[0].stdout == ""
   - name: copy original chain
     copy: src={{ nxt_local_folder }}/distrib/chain-original-{{ nxt_conf_name }}.tar.gz dest={{ nxt_remote_folder }}/distrib
     when: localmd5.results[0].stdout != remotemd5.results[0].stdout and localmd5.results[0].stdout != ""
