@@ -2,15 +2,20 @@
 - name: install dependencies
   hosts: nxts
   tasks:
-  - name: install packages on Debian-based
-    apt: pkg={{ item }} state=latest
+  - name: install unzip on Debian-based
+    apt: pkg={{ item }} update_cache=yes state=latest
     with_items:
-      - "openjdk-7-jre"
       - "unzip"
     when: ansible_os_family == "Debian"
     sudo: yes
+  - name: install JRE on Debian-based
+    apt: pkg={{ item }} state=latest
+    with_items:
+      - "openjdk-7-jre"
+    when: ansible_os_family == "Debian" and ansible_distribution_version.split('.')[0]|int >= 7
+    sudo: yes
   - name: install packages on RedHat-based
-    yum: name={{ item }} state=latest
+    yum: name={{ item }} update_cache=yes state=latest
     with_items:
       - "openjdk-7-jre"
       - "unzip"
