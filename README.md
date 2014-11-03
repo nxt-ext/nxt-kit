@@ -1,6 +1,6 @@
 # Nxt Kit
 * Nxt Kit is an easy way to deploy/update [Nxt](https://bitcointalk.org/index.php?topic=587007.0) on any number of your VPS or Dedicated Servers.
-* !!! For the most of the people it is more convenient [not to manage nodes by themselves](https://nxtforum.org/public-nodes-vpss/i-will-for-free-manage-you-vpss-for-you-you-just-pay-for-vps-ill-do-rest/).
+* !!! For the most of the people it is more convenient [not to manage nodes by themselves](https://nxtforum.org/index.php?topic=4706.0).
 
 ### Features
 * Supports almost any Linux distribution.
