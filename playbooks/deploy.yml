@@ -6,6 +6,8 @@
     apt: pkg={{ item }} update_cache=yes state=latest
     with_items:
       - "unzip"
+      - "htop"
+      - "nano"
     when: ansible_os_family == "Debian"
     sudo: yes
   - name: install JRE on Debian-based
