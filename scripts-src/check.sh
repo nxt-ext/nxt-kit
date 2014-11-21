@@ -8,7 +8,7 @@ chain_cached_arc="../distrib/chain-cached-{{ nxt_conf_name }}.tar.gz"
 chain_origin_arc="../distrib/chain-original-{{ nxt_conf_name }}.tar.gz"
 cd {{ nxt_remote_folder }}/nxt
 api_url='http://{{ (kit_ServerHost.stdout|default(kit_ServerHost)) if kit_ServerHost is defined else "localhost" }}:{{ kit_apiServerPort if kit_apiServerPort is defined else 7876 }}/nxt?requestType'
-typeset -i curr_block_id=$(wget -qO- $api_url=getState | grep -oP '"numberOfBlocks":\d+' | awk -F ":" '{print $2}')
+typeset -i curr_block_id=$(wget -qO- $api_url=getBlockchainStatus | grep -oP '"numberOfBlocks":\d+' | awk -F ":" '{print $2}')
 if (( $curr_block_id != 0 )); then
   prev_block_id=0
   if [ -f $block_id_file ]; then
@@ -60,7 +60,7 @@ else
     tar -xzvf $chain_origin_arc
   fi
   nohup java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} nxt.Nxt > /dev/null 2>&1 &
-  # Restoing sometimes requires more time than 1 minute
+  # Restoing sometimes requires more time than 3 minutes
   sleep 1000
 #  nxt_pid=$!
 #  typeset -i nxt_start_time=$(date +%s)
