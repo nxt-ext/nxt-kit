@@ -8,19 +8,21 @@ chain_cached_arc="../distrib/chain-cached-{{ nxt_conf_name }}.tar.gz"
 chain_origin_arc="../distrib/chain-original-{{ nxt_conf_name }}.tar.gz"
 cd {{ nxt_remote_folder }}/nxt
 api_url='http://{{ (kit_ServerHost.stdout|default(kit_ServerHost)) if kit_ServerHost is defined else "localhost" }}:{{ kit_apiServerPort if kit_apiServerPort is defined else 7876 }}/nxt?requestType'
-typeset -i curr_block_id=$(wget -qO- $api_url=getBlockchainStatus | grep -oP '"numberOfBlocks":\d+' | awk -F ":" '{print $2}')
+blockchain_status=$(wget -qO- $api_url=getBlockchainStatus)
+typeset -i curr_block_id=$(echo $blockchain_status | grep -oP '"numberOfBlocks":\d+' | awk -F ":" '{print $2}')
 if (( $curr_block_id != 0 )); then
   prev_block_id=0
   if [ -f $block_id_file ]; then
       typeset -i prev_block_id=$(cat $block_id_file)
   fi
   if (( $curr_block_id != $prev_block_id )); then
-    block_address=$(wget -qO- $api_url=getState | grep -oP '"lastBlock":"\d+"' | awk -F ":" '{print $2}' | sed 's/"//g')
+    block_address=$(echo $blockchain_status | grep -oP '"lastBlock":"\d+"' | awk -F ":" '{print $2}' | sed 's/"//g')
     declare -A recent_blocks_generators
     for i in {1..5}
     do
-      recent_blocks_generators[$(wget -qO- $api_url=getBlock\&block=$block_address | grep -oP '"generator":"\d+"' | awk -F ":" '{print $2}' | sed 's/"//g')]='+'
-      block_address=$(wget -qO- $api_url=getBlock\&block=$block_address | grep -oP '"previousBlock":"\d+"' | awk -F ":" '{print $2}' | sed 's/"//g')
+      block_info=$(wget -qO- $api_url=getBlock\&block=$block_address)
+      recent_blocks_generators[$(echo $block_info | grep -oP '"generator":"\d+"' | awk -F ":" '{print $2}' | sed 's/"//g')]='+'
+      block_address=$(echo $block_info | grep -oP '"previousBlock":"\d+"' | awk -F ":" '{print $2}' | sed 's/"//g')
     done
     if (( {{ '${#recent_blocks_generators[@]}' }} > 1 )); then
       echo "$(date) OK: caching chain with block $curr_block_id" >> $log_file
