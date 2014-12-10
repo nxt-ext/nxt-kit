@@ -59,6 +59,7 @@
     with_items:
       - "chain-original-{{ nxt_conf_name }}.tar.gz"
       - "nxt.zip"
+    run_once: true
     changed_when: false
     register: localmd5
   - name: calculate remote md5
