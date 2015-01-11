@@ -63,8 +63,16 @@ else
   fi
   nohup java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} nxt.Nxt > /dev/null 2>&1 &
   # Restoing sometimes requires more time than 3 minutes
-  sleep 1000
-#  nxt_pid=$!
+  nxt_pid=$!
+  for i in {1..10}
+  do
+    if ps -p $nxt_pid > /dev/null
+    then
+      sleep 100
+    else
+      exit 1
+    fi
+  done
 #  typeset -i nxt_start_time=$(date +%s)
 #  tail -f ../distrib/nohup.log | while read LOGLINE
 #  do
