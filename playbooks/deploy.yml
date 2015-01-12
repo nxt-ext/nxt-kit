@@ -97,7 +97,7 @@
       register: hallmark_result
       when: secret_phrase != ""
     - name: kill and wait nxt
-      shell: pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
+      shell: pkill -SIGKILL -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
       ignore_errors: yes
     - name: copy lastest distrib
       copy: src={{ nxt_local_folder }}/distrib/nxt.zip dest={{ nxt_remote_folder }}/distrib
