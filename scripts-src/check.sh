@@ -31,7 +31,7 @@ if (( $curr_block_id != 0 )); then
       tar -czvf $chain_cached_arc $db_folder
     else
       echo "$(date) ERROR: The latest generator is too lucky. Looks like a fork" >> $log_file
-      pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
+      pkill -f 'java -cp classes:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp classes:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
       rm -f $chain_cached_arc
     fi
   else
@@ -45,13 +45,13 @@ if (( $curr_block_id != 0 )); then
       echo "$(date) OK: block $curr_block_id repeated $prev_block_cnt times" >> $log_file
     else
       echo "$(date) ERROR: I can't stand block $curr_block_id any longer" >> $log_file
-      pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
+      pkill -f 'java -cp classes:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp classes:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
       rm -f $chain_cached_arc
     fi
   fi
 else
   echo "$(date) ERROR: nxt is NOT running correctly" >> $log_file
-  pkill -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
+  pkill -f 'java -cp classes:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp classes:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
   rm -rf $db_folder $block_id_file $block_cnt_file
   if [ -f $chain_cached_arc ]; then
     echo "$(date) Restoring cached chain" >> $log_file
@@ -61,7 +61,7 @@ else
     echo "$(date) Restoring original chain" >> $log_file
     tar -xzvf $chain_origin_arc
   fi
-  nohup java -cp nxt.jar:lib/\*:{{ nxt_conf_name }} nxt.Nxt > /dev/null 2>&1 &
+  nohup java -cp classes:lib/\*:{{ nxt_conf_name }} nxt.Nxt > /dev/null 2>&1 &
   # Restoing sometimes requires more time than 3 minutes
   nxt_pid=$!
   for i in {1..10}
