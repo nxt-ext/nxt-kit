@@ -43,6 +43,5 @@ ansible-playbook -f 10 -v ~/nxt-kit/playbooks/deploy.yml
 * Also you can PM me (EmoneyRu) on [BCT](https://bitcointalk.org/index.php?action=profile;u=125071;sa=summary) or [NXT Forum](https://nxtforum.org/index.php?action=profile;u=300).
 
 ## Donations
-* [NXT-9XEN-PLLG-RUW8-2H7SV](http://87.230.14.1/nxt/nxt.cgi?action=3000&acc=999992273311888788)
-* [999992273311888788](http://87.230.14.1/nxt/nxt.cgi?action=3000&acc=999992273311888788)
+* [NXT-VPP6-RFBG-WMAH-54SDX](http://87.230.14.1/nxt/nxt.cgi?action=3000&acc=4516831954849355428)
 
