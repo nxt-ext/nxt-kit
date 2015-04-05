@@ -6,20 +6,38 @@
     apt: pkg={{ item }} update_cache=yes state=latest
     with_items:
       - "unzip"
+      - "python-apt"
+      - "debconf-utils"
       - "htop"
       - "nano"
+    when: ansible_os_family == "Debian"
+    sudo: yes
+  - name: Install WebUpd8 apt key on Debian
+    apt_key: id=EEA14886 keyserver='keyserver.ubuntu.com' state=present
+    when: ansible_distribution == "Debian"
+    sudo: yes
+  - name: Install WebUpd8 Team Java PPA (for Oracle Java) on Debian
+    apt_repository: repo='deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main' state=present update_cache=yes
+    when: ansible_distribution == "Debian"
+    sudo: yes
+  - name: Install WebUpd8 Team Java PPA (for Oracle Java) on Ubuntu
+    apt_repository: repo=ppa:webupd8team/java state=present update_cache=yes
+    when: ansible_distribution == "Ubuntu"
+    sudo: yes
+  - name: Accept Oracle license
+    debconf: name='oracle-java8-installer' question='shared/accepted-oracle-license-v1-1' value='true' vtype='select'
     when: ansible_os_family == "Debian"
     sudo: yes
   - name: install JRE on Debian-based
     apt: pkg={{ item }} state=latest
     with_items:
-      - "openjdk-7-jre"
-    when: ansible_os_family == "Debian" and ansible_distribution_version.split('.')[0]|int >= 7
+      - "oracle-java8-set-default"
+    when: ansible_os_family == "Debian"
     sudo: yes
   - name: install packages on RedHat-based
     yum: name={{ item }} update_cache=yes state=latest
     with_items:
-      - "openjdk-7-jre"
+      - "openjdk-8-jre"
       - "unzip"
     when: ansible_os_family == "RedHat"
     sudo: yes
