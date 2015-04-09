@@ -121,7 +121,7 @@
       copy: src={{ nxt_local_folder }}/distrib/nxt.zip dest={{ nxt_remote_folder }}/distrib
       when: localmd5.results[1].stdout != remotemd5.results[1].stdout
     - name: unpack new version
-      shell: cd {{ nxt_remote_folder }} && rm -rf nxt && unzip distrib/nxt.zip
+      shell: cd {{ nxt_remote_folder }} && rm -rf nxt && unzip -q distrib/nxt.zip
     - name: setup properties
       template: src={{ nxt_local_folder }}/templates/nxt.properties.j2 dest={{ nxt_remote_folder }}/nxt/{{ nxt_conf_name }}/nxt.properties
     - name: mark installation stable
