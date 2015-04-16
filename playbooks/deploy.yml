@@ -31,6 +31,7 @@
   - name: install JRE on Debian-based
     apt: pkg={{ item }} state=latest
     with_items:
+      - "oracle-java8-installer"
       - "oracle-java8-set-default"
     when: ansible_os_family == "Debian"
     sudo: yes
