@@ -25,10 +25,14 @@ if (( $curr_block_id != 0 )); then
       block_address=$(echo $block_info | grep -oP '"previousBlock":"\d+"' | awk -F ":" '{print $2}' | sed 's/"//g')
     done
     if (( {{ '${#recent_blocks_generators[@]}' }} > 1 )); then
-      echo "$(date) OK: caching chain with block $curr_block_id" >> $log_file
       echo $curr_block_id > $block_id_file
       echo 1 > $block_cnt_file
-      tar -czvf $chain_cached_arc $db_folder
+      if (( RANDOM % 3 )); then
+        echo "$(date) OK: it works with block $curr_block_id" >> $log_file
+      else
+        echo "$(date) OK: caching chain with block $curr_block_id" >> $log_file
+        tar -czvf $chain_cached_arc $db_folder
+      fi
     else
       echo "$(date) ERROR: The latest generator is too lucky. Looks like a fork" >> $log_file
       pkill -f 'java -cp classes:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp classes:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
