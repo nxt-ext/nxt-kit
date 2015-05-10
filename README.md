@@ -24,19 +24,19 @@ ansible-playbook -f 10 -v ~/nxt-kit/playbooks/deploy.yml
 3. If you are **not** paranoid
   * add user to [sudo with NOPASSWD](http://lmgtfy.com/?q=sudo+nopasswd+all+commands) for all commands.
 4. If you are paranoid
-  * install `openjdk-7-jre` and `unzip` packages manually.
+  * install `oracle-java8-installer` and `unzip` packages manually.
  
 ### On control machine
 1. Install [ansible](http://docs.ansible.com/intro_installation.html#installing-the-control-machine) and [openssh-client](http://lmgtfy.com/?q=how+to+install+openssh-client+on+linux).
 2. Add your servers to [inventory group](http://www.ansibleworks.com/docs/intro_inventory.html) `nxts`.
 3. Add `exec ssh-agent bash` to the end of `~/.profile`.
 4. SSH and exit *to each* of your managed node (to cache their public keys).
-5. Add `ssh-add ~/.ssh/PRIVATE-KEY-FOR-REMOTE-SERVER > /dev/null 2>&1` to the end of the `~/.bashrc` *for each* remote server.
+5. Add `ssh-add ~/.ssh/PRIVATE-KEY-FOR-REMOTE-SERVER > /dev/null 2>&1` to the end of the `~/.bashrc` *for each* private key for remote server.
 6. Relogin.
 7. Clone this repo to `~/nxt-kit` via `git clone https://github.com/nxt-ext/nxt-kit.git ~/nxt-kit`.
 8. Put valid tarred, gzipped `nxt_db` folder as `~/nxt-kit/distrib/chain-original-conf.tar.gz` (_optional_).
 9. If you **was** paranoid on managed nodes installation
-  * Remove [dependency install block](https://github.com/nxt-ext/nxt-kit/blob/c546771aad40b52eb113f8dbe368076f2df064b4/playbooks/deploy.yml#L34-L50) from `~/nxt-kit/playbooks/deploy.yml`.
+  * Remove [dependency install block](https://github.com/nxt-ext/nxt-kit/blob/c3d96ef4f56ca15b38b324f1eefe0d5dd03acd84/playbooks/deploy.yml#L2-L44) from `~/nxt-kit/playbooks/deploy.yml`.
  
 ## Contacts
 * There is a [thread](https://nxtforum.org/public-nodes-vpss/%28nxt-kit%29-vps-management-software-by-emoneyru/) on NXT Forum for this tool. Feel free to discuss it there.
