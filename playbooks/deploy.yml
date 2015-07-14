@@ -2,10 +2,11 @@
 - name: install dependencies
   hosts: nxts
   tasks:
-  - name: install unzip on Debian-based
+  - name: install packages on Debian-based
     apt: pkg={{ item }} update_cache=yes state=latest
     with_items:
       - "unzip"
+      - "cron"
       - "python-apt"
       - "debconf-utils"
       - "htop"
@@ -40,6 +41,7 @@
     with_items:
       - "openjdk-8-jre"
       - "unzip"
+      - "cron"
     when: ansible_os_family == "RedHat"
     sudo: yes
 
