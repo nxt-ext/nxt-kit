@@ -36,3 +36,8 @@ nxt.log=nxt-{{ nxt_conf_name }}.log
 nxt.debug=true
 
 nxt.debugJetty=true
+
+{% if 'mine' in group_names %}
+nxt.maxNumberOfConnectedPublicPeers=10000
+nxt.maxNumberOfKnownPeers=10000
+{% endif %}
