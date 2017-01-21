@@ -73,12 +73,16 @@
       - "{{ nxt_remote_folder }}"
       - "{{ nxt_remote_folder }}/distrib"
       - "{{ nxt_remote_folder }}/sbin"
-  - name: remove cached chain
+  - name: remove cached chain (old)
     file: path="{{ nxt_remote_folder }}/distrib/chain-cached-{{ nxt_conf_name }}.tar.gz" state=absent
+  - name: remove cached chain
+    file: path="{{ nxt_remote_folder }}/distrib/chain-cached-{{ nxt_conf_name }}.tar.xz" state=absent
+  - name: remove original chain (old)
+    file: path="{{ nxt_remote_folder }}/distrib/chain-original-{{ nxt_conf_name }}.tar.gz" state=absent
   - name: calculate local md5
     local_action: shell /usr/bin/md5sum {{ nxt_local_folder }}/distrib/{{ item }} | awk '{print $1;}'
     with_items:
-      - "chain-original-{{ nxt_conf_name }}.tar.gz"
+      - "chain-original-{{ nxt_conf_name }}.zip"
       - "nxt.zip"
     run_once: true
     changed_when: false
@@ -86,15 +90,15 @@
   - name: calculate remote md5
     shell: /usr/bin/md5sum {{ nxt_remote_folder }}/distrib/{{ item }} | awk '{print $1;}'
     with_items:
-      - "chain-original-{{ nxt_conf_name }}.tar.gz"
+      - "chain-original-{{ nxt_conf_name }}.zip"
       - "nxt.zip"
     changed_when: false
     register: remotemd5
   - name: delete original chain
-    file: path="{{ nxt_remote_folder }}/distrib/chain-original-{{ nxt_conf_name }}.tar.gz" state=absent
+    file: path="{{ nxt_remote_folder }}/distrib/chain-original-{{ nxt_conf_name }}.zip" state=absent
     when: localmd5.results[0].stdout == ""
   - name: copy original chain
-    copy: src={{ nxt_local_folder }}/distrib/chain-original-{{ nxt_conf_name }}.tar.gz dest={{ nxt_remote_folder }}/distrib
+    copy: src={{ nxt_local_folder }}/distrib/chain-original-{{ nxt_conf_name }}.zip dest={{ nxt_remote_folder }}/distrib
     when: localmd5.results[0].stdout != remotemd5.results[0].stdout and localmd5.results[0].stdout != ""
   - name: previous installation was successful
     stat: path="{{ nxt_remote_folder ~ '/' ~ nxt_is_stable_flag }}"
@@ -121,7 +125,7 @@
       shell: pkill -SIGKILL -f 'java -cp classes:lib/\*:{{ nxt_conf_name }} ' && while pgrep -f 'java -cp classes:lib/\*:{{ nxt_conf_name }} ' > /dev/null; do sleep 1; done
       ignore_errors: yes
     - name: copy lastest distrib
-      copy: src={{ nxt_local_folder }}/distrib/nxt.zip dest={{ nxt_remote_folder }}/distrib
+      copy: src={{ nxt_local_folder }}/distrib/nxt.zip dest={{ nxt_remote_folder }}/distrib/nxt.zip
       when: localmd5.results[1].stdout != remotemd5.results[1].stdout
     - name: unpack new version
       shell: cd {{ nxt_remote_folder }} && rm -rf nxt && unzip -q distrib/nxt.zip

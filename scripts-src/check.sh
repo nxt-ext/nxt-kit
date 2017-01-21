@@ -4,8 +4,8 @@ log_file="../distrib/cron-{{ nxt_conf_name }}.log"
 block_id_file="../distrib/block-{{ nxt_conf_name }}-ID"
 block_cnt_file="../distrib/block-{{ nxt_conf_name }}-Cnt"
 db_folder="nxt_db/"
-chain_cached_arc="../distrib/chain-cached-{{ nxt_conf_name }}.tar.gz"
-chain_origin_arc="../distrib/chain-original-{{ nxt_conf_name }}.tar.gz"
+chain_cached_arc="../distrib/chain-cached-{{ nxt_conf_name }}.tar.xz"
+chain_origin_arc="../distrib/chain-original-{{ nxt_conf_name }}.zip"
 cd {{ nxt_remote_folder }}/nxt
 api_url='http://{{ (kit_ServerHost.stdout|default(kit_ServerHost)) if kit_ServerHost is defined else "localhost" }}:{{ kit_apiServerPort if kit_apiServerPort is defined else 7876 }}/nxt?requestType'
 blockchain_status=$(wget -qO- $api_url=getBlockchainStatus)
@@ -27,11 +27,11 @@ if (( $curr_block_id != 0 )); then
     if (( {{ '${#recent_blocks_generators[@]}' }} > 1 )); then
       echo $curr_block_id > $block_id_file
       echo 1 > $block_cnt_file
-      if (( RANDOM % 3 )); then
+      if (( RANDOM % 30 )); then
         echo "$(date) OK: it works with block $curr_block_id" >> $log_file
       else
         echo "$(date) OK: caching chain with block $curr_block_id" >> $log_file
-        tar -czvf $chain_cached_arc $db_folder
+        tar -cJf $chain_cached_arc $db_folder
       fi
     else
       echo "$(date) ERROR: The latest generator is too lucky. Looks like a fork" >> $log_file
@@ -59,11 +59,11 @@ else
   rm -rf $db_folder $block_id_file $block_cnt_file
   if [ -f $chain_cached_arc ]; then
     echo "$(date) Restoring cached chain" >> $log_file
-    tar -xzvf $chain_cached_arc
+    tar -xJf $chain_cached_arc
     rm -f $chain_cached_arc
   elif [ -f $chain_origin_arc ]; then
     echo "$(date) Restoring original chain" >> $log_file
-    tar -xzvf $chain_origin_arc
+    unzip $chain_origin_arc -d ..
   fi
   nohup java -cp classes:lib/\*:{{ nxt_conf_name }} nxt.Nxt > /dev/null 2>&1 &
   # Restoing sometimes requires more time than 3 minutes
