@@ -26,7 +26,7 @@ ansible nxts -m get_url -a "url=https://www.dropbox.com/s/CHANGE_THIS_URL/nxt_db
 
 ## Installation
 ### On managed VPS nodes
-1. Satisfy [these requirements](http://docs.ansible.com/intro_installation.html#managed-node-requirements). For the latest Ubuntu/Debian/RedHat it would work out of the box.
+1. Satisfy [these requirements](http://docs.ansible.com/ansible/intro_installation.html#managed-node-requirements). For the latest Ubuntu/Debian/RedHat it would work out of the box.
 2. Configure SSH access using [key authentication](http://lmgtfy.com/?q=ssh+key+authentication) without password.
 3. If you are **not** paranoid
   * add user to [sudo with NOPASSWD](http://lmgtfy.com/?q=sudo+nopasswd+all+commands) for all commands.
@@ -34,8 +34,8 @@ ansible nxts -m get_url -a "url=https://www.dropbox.com/s/CHANGE_THIS_URL/nxt_db
   * install `oracle-java8-installer` and `unzip` packages manually.
  
 ### On control machine
-1. Install [ansible](http://docs.ansible.com/intro_installation.html#installing-the-control-machine) and [openssh-client](http://lmgtfy.com/?q=how+to+install+openssh-client+on+linux).
-2. Add your servers to [inventory group](http://www.ansibleworks.com/docs/intro_inventory.html) `nxts`.
+1. Install [ansible](http://docs.ansible.com/ansible/intro_installation.html#installing-the-control-machine) and [openssh-client](http://lmgtfy.com/?q=how+to+install+openssh-client+on+linux).
+2. Add your servers to [inventory group](http://docs.ansible.com/ansible/intro_inventory.html) `nxts`.
 3. Add `exec ssh-agent bash` to the end of `~/.profile`.
 4. SSH and exit *to each* of your managed node (to cache their public keys).
 5. Add `ssh-add ~/.ssh/PRIVATE-KEY-FOR-REMOTE-SERVER > /dev/null 2>&1` to the end of the `~/.bashrc` *for each* private key for remote server.
