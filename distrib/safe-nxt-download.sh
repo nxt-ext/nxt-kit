@@ -6,7 +6,7 @@ fi
 export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin;
 { wget -qO - https://www.jelurida.com/sites/default/files/jelurida.gpg | gpg --import - > /dev/null 2>&1; } || { echo "Could not recieve public key for file verification. Exiting."; exit 1; }
 rm -f nxt-client-$1.* nxt.zip
-wget -nv https://bitbucket.org/JeanLucPicard/nxt/downloads/nxt-client-$1.{zip,sh,zip.asc,sh.asc,changelog.txt.asc} > /dev/null 2>&1
+wget -nv https://bitbucket.org/Jelurida/nxt/downloads/nxt-client-$1.{zip,sh,zip.asc,sh.asc,changelog.txt.asc} > /dev/null 2>&1
 zip_sig=$(gpg --verify nxt-client-$1.zip.asc > /dev/null 2>&1; echo $?)
 sh_sig=$(gpg --verify nxt-client-$1.sh.asc > /dev/null 2>&1; echo $?)
 chg_sig=$(gpg --verify nxt-client-$1.changelog.txt.asc > /dev/null 2>&1; echo $?)
