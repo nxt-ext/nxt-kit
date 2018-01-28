@@ -63,7 +63,7 @@ else
     rm -f $chain_cached_arc
   elif [ -f $chain_origin_arc ]; then
     echo "$(date) Restoring original chain" >> $log_file
-    unzip $chain_origin_arc -d ..
+    unzip $chain_origin_arc
   fi
   nohup java {{ jvm_args|default("") }} -cp classes:lib/\*:{{ nxt_conf_name }}:addons/classes:addons/lib/* nxt.Nxt > /dev/null 2>&1 &
   # Restoing sometimes requires more time than 3 minutes

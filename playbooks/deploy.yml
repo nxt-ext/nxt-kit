@@ -68,7 +68,7 @@
     shell: pkill -f 'check-nxt-{{ nxt_conf_name }}.sh'
     ignore_errors: yes
   - name: check remote folders
-    file: path={{ item }} state=directory owner={{ ansible_ssh_user }} mode=0744
+    file: path={{ item }} state=directory owner={{ ansible_user }} mode=0744
     with_items:
       - "{{ nxt_remote_folder }}"
       - "{{ nxt_remote_folder }}/distrib"

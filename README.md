@@ -7,7 +7,7 @@
 * Hallmarks nodes, changes config to make node public.
 * Detects malfunctioning and automatically restarts client.
   * Caches valid chain.
-  * Supports blockchain snapshots from [Nxt PeerExplorer](http://peerexplorer.com/api_blockchain_download).
+  * Supports blockchain snapshots from [Jelurida](https://www.jelurida.com/).
 
 ## Usage
 To deploy new version of Nxt, download it via `safe-nxt-download.sh`, [check](https://bitcointalk.org/index.php?topic=345619.msg4406124#msg4406124) file signature and execute playbook.
@@ -18,10 +18,10 @@ cd ~/nxt-kit/distrib
 ansible-playbook -f 10 -v ~/nxt-kit/playbooks/deploy.yml
 ```
 
-You can also save the outbound traffic of the control machine by downloading a snapshot from [Nxt PeerExplorer](http://peerexplorer.com/api_blockchain_download) _before_ running the playbook.
+You can also save the outbound traffic of the control machine by downloading a snapshot from [Jelurida](https://www.jelurida.com/) _before_ running the playbook.
 
 ```
-ansible nxts -m get_url -a "url=https://www.dropbox.com/s/CHANGE_THIS_URL/nxt_db_peerexplorer.zip?dl=1 dest=~/nxt-kit-deployed/distrib/chain-original-conf.zip force=yes" -f 10 -v
+ansible nxts -m get_url -a "url=https://www.jelurida.com/NXT-nxt_db.zip dest=~/nxt-kit-deployed/distrib/chain-original-conf.zip force=yes" -f 10 -v
 ```
 
 ## Installation
@@ -41,7 +41,7 @@ ansible nxts -m get_url -a "url=https://www.dropbox.com/s/CHANGE_THIS_URL/nxt_db
 5. Add `ssh-add ~/.ssh/PRIVATE-KEY-FOR-REMOTE-SERVER > /dev/null 2>&1` to the end of the `~/.bashrc` *for each* private key for remote server.
 6. Relogin.
 7. Clone this repo to `~/nxt-kit` via `git clone https://github.com/nxt-ext/nxt-kit.git ~/nxt-kit`.
-8. Put a valid zipped `nxt_db` folder as `~/nxt-kit/distrib/chain-original-conf.zip` (_optional_). The archive from [Nxt PeerExplorer](http://peerexplorer.com/api_blockchain_download) is OK.
+8. Put a valid zipped `nxt_db` folder as `~/nxt-kit/distrib/chain-original-conf.zip` (_optional_). The archive from [Jelurida](https://www.jelurida.com/) is OK.
 9. If you **was** paranoid on managed nodes installation
   * Remove [dependency install block](https://github.com/nxt-ext/nxt-kit/blob/c3d96ef4f56ca15b38b324f1eefe0d5dd03acd84/playbooks/deploy.yml#L2-L44) from `~/nxt-kit/playbooks/deploy.yml`.
  
