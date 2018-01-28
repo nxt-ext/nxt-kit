@@ -50,5 +50,5 @@ ansible nxts -m get_url -a "url=https://www.jelurida.com/NXT-nxt_db.zip dest=~/n
 * Also you can PM me (EmoneyRu) on [BCT](https://bitcointalk.org/index.php?action=profile;u=125071;sa=summary) or [NXT Forum](https://nxtforum.org/index.php?action=profile;u=300).
 
 ## Donations
-* [NXT-VPP6-RFBG-WMAH-54SDX](http://www.nxtexplorer.com/nxt/nxt.cgi?action=3000&acc=4516831954849355428)
+* [NXT-VPP6-RFBG-WMAH-54SDX](https://www.mynxt.info/account/4516831954849355428)
 
